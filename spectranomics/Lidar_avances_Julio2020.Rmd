@@ -209,7 +209,9 @@ class: inverse, middle, center
 # NORMALIZACIÓN y CHM
 ---
 
+#Normalización con DTM
 ```{r eval=F}
+
 ##normalize, might take a little while to run
 opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02c_normalize/normalize_v1_{XLEFT}_{YBOTTOM}'
 normalize_ctg<- lasnormalize(classify_ctg, dtm,na.rm = T)
@@ -219,7 +221,7 @@ lascheck(normalize_ctg)
 
 ---
 
-# Tables
+# CHM
 
 If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
 
@@ -229,16 +231,8 @@ knitr::kable(head(iris), format = 'html')
 
 ---
 
-# HTML Widgets
+# Segmentation
 
-<<<<<<< HEAD
-=======
-I have not thoroughly tested HTML widgets against **xaringan**. Some may work well, and some may not. It is a little tricky.
-
-
->>>>>>> 54fbd28dba339d8d7ee86daa6da7dc8f6ab5824a
-
-See the next page for two HTML widgets.
 
 
 ---
@@ -251,16 +245,7 @@ DT::datatable(
 ```
 
 
----
-Resaltando código usando **#<<**
 
-```{r tidy=FALSE, eval=FALSE}
-library(ggplot2)
-ggplot(mtcars) + 
-  aes(mpg, disp) + 
-  geom_point() +   #<<
-  geom_smooth()    #<<
-```
 
 ---
 
@@ -282,6 +267,7 @@ class: center, middle
 
 # Thanks!
 
-Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+.footnote[[]Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan)]
 
-The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](http://yihui.org/knitr), and [R Markdown](https://rmarkdown.rstudio.com).
+
+
