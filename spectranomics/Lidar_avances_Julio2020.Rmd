@@ -36,18 +36,9 @@ class: inverse, center, middle
 library(leaflet)
 library(tidyverse)
 library(sf)
-shp<-read_sf('extent_lidar.shp') 
-predios<-read_sf('PREDIOS_Hiperespectral.shp')
-shp<-st_transform(shp,'+proj=longlat +datum=WGS84 +no_defs ') %>% as_Spatial()
-predios<-st_transform(predios,'+proj=longlat +datum=WGS84 +no_defs ') %>% as_Spatial()
 
-leaflet()%>% addTiles()%>% 
-  addPolygons(data = predios,color = 'blue', weight = 1, popup = ~NOMBRE,smoothFactor = 0.5,
-    opacity = 0.5, fillOpacity = 0.5,highlightOptions = highlightOptions(color = "white", weight = 1,
-      bringToFront = TRUE)) %>% addProviderTiles("CartoDB.PositronOnlyLabels") %>% 
-  addPolygons(data = shp,color = 'yellow', weight = 1, smoothFactor = 0.5,
-    opacity = 1.0, fillOpacity = 0.8,highlightOptions = highlightOptions(color = "white", weight = 2,
-      bringToFront = TRUE)) %>% addProviderTiles("CartoDB.PositronOnlyLabels")
+
+leaflet()%>% addTiles()
 
 ```
 
