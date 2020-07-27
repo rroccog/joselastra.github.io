@@ -13,6 +13,7 @@ output:
       ratio: '16:9'
       highlightLines: true
       countIncrementalSlides: false
+      beforeInit: "macros.js"
       
 ---
 
@@ -124,15 +125,25 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 - Se pueden aplicar las funciones a todos los archivos considerando procesamiento wall-to-wall asegurando ajuste entre los archivbos y chunks procesados
 
 ---
+#Nube de puntos
 
+- Con *readLAS()* podemos abrir individualmente y visalizar
+- Con *readLAScatalog()* podemos identificar la información de los archivos y visualizar los parámetros de procesamiento
 
-background-image: url(las_cloud1.png)
-background-position: center
-background-size:contain
+```{r , echo=T,eval=F}
+##processing options for classify
+opt_chunk_size(ctg) <- 250 #defining tiles for processing
+opt_chunk_buffer(ctg) <- 10 #defining buffer
+summary(ctg)
+```
 
 
 ---
 
+.left[![:scale 50%](las_cloud1.png)]
+.right[![:scale 40%](summary_catalog.png)]
+
+---
 # Diapo con viñetas
 
 algo algo
