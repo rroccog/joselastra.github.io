@@ -19,7 +19,7 @@ output:
 
 background-image: url(logo_labgrs_color.png)
 background-position: center
-background-size:contain
+background-size:50%
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
@@ -136,58 +136,85 @@ opt_chunk_size(ctg) <- 250 #defining tiles for processing
 opt_chunk_buffer(ctg) <- 10 #defining buffer
 summary(ctg)
 ```
+.pull-left[![:scale 40%](las_cloud1.png)]
+.pull-right[![:scale 50%](summary_catalog.png)]
 
 
 ---
+# Aspectos críticos
+- Tiempo de procesamiento
+- **Clasificación de puntos**
+- Generación de un buen DTM, normalización y buen CHM
+- Segmentación de copas óptima para el área
 
-.left[![:scale 50%](las_cloud1.png)]
-.right[![:scale 40%](summary_catalog.png)]
+.center[
+Método **Progressive Morphological Filter (pmf)**
+
+![data](PMF.svg)
+]
+
+.footnote[Roussel, Goodbody & Tompalski, 2020.]
+---
+
+.center[
+Método **Cloth Simulation Function (csf)**
+
+![:scale 85%](CSF.svg)
+]
+
+.footnote[Roussel, Goodbody & Tompalski, 2020.]
+---
+# Clasificación
+
+Ejemplo: 
+```{r , echo=T,eval=F}
+##defining output name and directory
+opt_output_files(ctg) <- '02_LiDAR/02_muestraOutput/02a_Ground/ground_{XLEFT}_{YBOTTOM}'
+classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_returns = T)
+```
+.center[
+![:scale 65%](las_cloud2.png)
+]
 
 ---
-# Diapo con viñetas
+# Aspectos críticos
+- Tiempo de procesamiento
+- Clasificación de puntos
+- **Generación de un buen DTM, normalización y buen CHM**
+- Segmentación de copas óptima para el área
 
-algo algo
+Modelo ejemplo para el área considerando parámetros anteriores e interpolación simple **tin()**
 
-- primero;
+```{r comment='#',eval=F}
+# a boring regression
+#output name
+opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02b_dtm/dtm_v1_{XLEFT}_{YBOTTOM}'
+dtm <- grid_terrain(classify_ctg, res = 1, tin(), keep_lowest = FALSE)#<<
+plot_dtm3d(dtm, bg='transparent')
+```
+---
+class: inverse, middle, center
 
-- segundo;
+# MODELO PARA TODA EL ÁREA
 
-- tercero;
-
-
-
-
-
-.footnote[[*] It is different with Pandoc's Markdown! It is limited but should be enough for presentation purposes. Come on... You do not need a slide for the Table of Contents! Well, the Markdown support in remark.js [may be improved](https://github.com/gnab/remark/issues/142) in the future.]
-
+---
+background-image: url(dtm_ex.png)
+background-position: center
+background-size:contain
 
 
 ---
 class: inverse, middle, center
 
-# separador
-
-
+# NORMALIZACIÓN y CHM
 ---
 
-# R Code
-
-```{r comment='#'}
-# a boring regression
-fit = lm(dist ~ 1 + speed, data = cars)
-coef(summary(fit))
-dojutsu = c('地爆天星', '天照', '加具土命', '神威', '須佐能乎', '無限月読')
-grep('天', dojutsu, value = TRUE)
-```
-
----
-
-# R Plots
-
-```{r cars, fig.height=4, dev='svg'}
-par(mar = c(4, 4, 1, .1))
-plot(cars, pch = 19, col = 'darkgray', las = 1)
-abline(fit, lwd = 2)
+```{r eval=F}
+##normalize, might take a little while to run
+opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02c_normalize/normalize_v1_{XLEFT}_{YBOTTOM}'
+normalize_ctg<- lasnormalize(classify_ctg, dtm,na.rm = T)
+summary(normalize_ctg)
+lascheck(normalize_ctg)
 ```
 
 ---
@@ -213,12 +240,6 @@ I have not thoroughly tested HTML widgets against **xaringan**. Some may work we
 
 See the next page for two HTML widgets.
 
----
-
-```{r out.width='100%', fig.height=6, eval=require('leaflet')}
-library(leaflet)
-leaflet() %>% addTiles() %>% setView(-93.65, 42.0285, zoom =17)
-```
 
 ---
 
@@ -228,8 +249,6 @@ DT::datatable(
   fillContainer = FALSE, options = list(pageLength = 8)
 )
 ```
-
-
 
 
 ---
