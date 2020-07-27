@@ -44,10 +44,9 @@ predios<-st_transform(predios,'+proj=longlat +datum=WGS84 +no_defs ') %>% as_Spa
 
 leaflet()%>% addTiles()%>% 
   addPolygons(data = predios,color = 'blue', weight = 1, popup = ~NOMBRE,smoothFactor = 0.5,
-    opacity = 0.5, fillOpacity = 0.5,highlightOptions = highlightOptions(color = "white", weight = 1,
-      bringToFront = TRUE)) %>% addProviderTiles("CartoDB.PositronOnlyLabels") %>% 
+    opacity = 0.5, fillOpacity = 0.5) %>% addProviderTiles("CartoDB.PositronOnlyLabels") %>% 
   addPolygons(data = shp,color = 'yellow', weight = 1, smoothFactor = 0.5,
-    opacity = 1.0, fillOpacity = 0.8,highlightOptions = highlightOptions(color = "white", weight = 2,
+    opacity = 1.0, fillOpacity = 0.5,highlightOptions = highlightOptions(color = "white", weight = 2,
       bringToFront = TRUE)) %>% addProviderTiles("CartoDB.PositronOnlyLabels")
 
 ```
@@ -88,10 +87,6 @@ results [label= 'Resultados']
 - Generación de un buen DTM, normalización y buen CHM;
 - Segmentación de copas óptima para el área;
 
-```{r out.width='100%',  fig.height=3, eval=require('leaflet'), echo=F,eval=F}
-library(leaflet)
-leaflet() %>% addTiles() 
-```
 
 ---
 
