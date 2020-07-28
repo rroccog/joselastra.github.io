@@ -6,7 +6,7 @@ institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
-    css: [fc]
+    #css: [metropolis]
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -31,9 +31,9 @@ class: inverse, center, middle
 # INTRODUCCIÓN
 
 ---
-#Área de prueba
+##Área de prueba
 
-```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
+```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',out.height= '70%',warning=FALSE,message=FALSE}
 library(leaflet)
 library(tidyverse)
 library(sf)
@@ -54,7 +54,7 @@ leaflet()%>% addTiles()%>%
 - Área: 1.08 km²
 - Densidad: 40.8 points/m²
 ---
-# LiDAR usando R
+## LiDAR usando R
 
 - Uso de paquete lidR: Roussel, J. R., Auty, D., DeFlorian, B., & Meador, A. S. (2020). *lidR: Airborne LiDAR Data Manipulation and Visualization for Forestry Applications*, version 3.0.2, acceso: 05 de Julio 2020, Recuperado de: [CRAN](https://CRAN.R-project.org/package=lidR)
 
@@ -90,7 +90,7 @@ results [label= 'Resultados']
 
 ---
 
-# Aspectos críticos
+## Aspectos críticos
 
 - **Tiempo de procesamiento**
 - Clasificación de puntos
@@ -121,7 +121,7 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 - Se pueden aplicar las funciones a todos los archivos considerando procesamiento wall-to-wall asegurando ajuste entre los archivbos y chunks procesados
 
 ---
-#Nube de puntos
+##Nube de puntos
 
 - Con *readLAS()* podemos abrir individualmente y visalizar
 - Con *readLAScatalog()* podemos identificar la información de los archivos y visualizar los parámetros de procesamiento
@@ -137,7 +137,7 @@ summary(ctg)
 
 
 ---
-# Aspectos críticos
+## Aspectos críticos
 
 - Tiempo de procesamiento
 - **Clasificación de puntos**
@@ -160,7 +160,7 @@ Método **Cloth Simulation Function (csf)**
 ]
 .footnote[Roussel, Goodbody & Tompalski, 2020.]
 ---
-# Clasificación
+## Clasificación
 
 Ejemplo: 
 ```{r , echo=T,eval=F}
@@ -173,7 +173,7 @@ classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_retu
 ]
 
 ---
-# Aspectos críticos
+## Aspectos críticos
 
 - Tiempo de procesamiento
 - Clasificación de puntos
@@ -206,7 +206,7 @@ class: inverse, middle, center
 # NORMALIZACIÓN y CHM
 ---
 
-#Normalización con DTM
+##Normalización con DTM
 ```{r eval=F}
 
 ##normalize, might take a little while to run
@@ -218,7 +218,7 @@ lascheck(normalize_ctg)
 
 ---
 
-# CHM
+## CHM
 
 If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
 
@@ -228,7 +228,7 @@ knitr::kable(head(iris), format = 'html')
 
 ---
 
-# Segmentation
+## Segmentation
 
 
 
@@ -246,7 +246,7 @@ DT::datatable(
 
 ---
 
-# Some Tips
+## Some Tips
 
 When you enable line-highlighting, you can also use the chunk option `highlight.output` to highlight specific lines of the text output from a code chunk. For example, `highlight.output = TRUE` means highlighting all lines, and `highlight.output = c(1, 3)` means highlighting the first and third line.
 
@@ -262,7 +262,7 @@ Question: what does `highlight.output = c(TRUE, FALSE)` mean? (Hint: think about
 
 class: center, middle
 
-# Thanks!
+## Thanks!
 
 .footnote[[]Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan)]
 
