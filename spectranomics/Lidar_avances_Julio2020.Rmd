@@ -6,7 +6,7 @@ institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
-    css: [fc,fc-fonts]
+    css: [fc]
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -91,6 +91,7 @@ results [label= 'Resultados']
 ---
 
 # Aspectos críticos
+
 - **Tiempo de procesamiento**
 - Clasificación de puntos
 - Generación de un buen DTM, normalización y buen CHM
@@ -137,6 +138,7 @@ summary(ctg)
 
 ---
 # Aspectos críticos
+
 - Tiempo de procesamiento
 - **Clasificación de puntos**
 - Generación de un buen DTM, normalización y buen CHM
@@ -173,6 +175,7 @@ classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_retu
 
 ---
 # Aspectos críticos
+
 - Tiempo de procesamiento
 - Clasificación de puntos
 - **Generación de un buen DTM, normalización y buen CHM**
