@@ -6,7 +6,7 @@ institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
-    #css: [fc-fonts]
+    css: [fc]
     lib_dir: libs
     nature:
       highlightStyle: github
