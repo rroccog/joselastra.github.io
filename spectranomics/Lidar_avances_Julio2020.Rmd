@@ -57,7 +57,7 @@ leaflet()%>% addTiles()%>%
 # LiDAR usando R
 
 - Uso de paquete lidR: Roussel, J. R., Auty, D., DeFlorian, B., & Meador, A. S. (2020). *lidR: Airborne LiDAR Data Manipulation and Visualization for Forestry Applications*, version 3.0.2, acceso: 05 de Julio 2020, Recuperado de: [CRAN](https://CRAN.R-project.org/package=lidR)
-
+--
 ```{r out.width='100%',  fig.height=2, eval=require('DiagrammeR'), echo=F,eval=T}
 library(DiagrammeR)
 grViz("digraph {
@@ -90,12 +90,7 @@ results [label= 'Resultados']
 
 ---
 
-# Aspectos críticos
-
--  <ru-blockquote>Tiempo de procesamiento </ru-blockquote>
-- Clasificación de puntos
-- Generación de un buen DTM, normalización y buen CHM
-- Segmentación de copas óptima para el área
+# Tiempo de procesamiento 
 
 .pull-left[
 ```{r ex1,eval=F}
@@ -133,16 +128,11 @@ opt_chunk_buffer(ctg) <- 10 #defining buffer
 summary(ctg)
 ```
 .pull-left[![:scale 45%](las_cloud1.png)]
-.pull-right[![:scale 45%](summary_catalog.png)]
+.pull-right[![:scale 50%](summary_catalog.png)]
 
 
 ---
-# Aspectos críticos
-
-- Tiempo de procesamiento
-- **Clasificación de puntos**
-- Generación de un buen DTM, normalización y buen CHM
-- Segmentación de copas óptima para el área
+# Clasificación de puntos
 
 .center[
 Método **Progressive Morphological Filter (pmf)**
@@ -173,17 +163,11 @@ classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_retu
 ]
 
 ---
-# Aspectos críticos
+# Generación de un buen DTM, normalización y buen CHM
 
-- Tiempo de procesamiento
-- Clasificación de puntos
-- **Generación de un buen DTM, normalización y buen CHM**
-- Segmentación de copas óptima para el área
-
-Modelo ejemplo para el área considerando parámetros anteriores e interpolación simple **tin()**
+Modelo ejemplo para el área considerando parámetros anteriores e interpolación simple *tin()*
 
 ```{r comment='#',eval=F}
-
 #output name
 opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02b_dtm/dtm_v1_{XLEFT}_{YBOTTOM}'
 dtm <- grid_terrain(classify_ctg, res = 1, tin(), keep_lowest = FALSE)#<<
@@ -208,7 +192,6 @@ class: inverse, middle, center
 
 #Normalización con DTM
 ```{r eval=F}
-
 ##normalize, might take a little while to run
 opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02c_normalize/normalize_v1_{XLEFT}_{YBOTTOM}'
 normalize_ctg<- lasnormalize(classify_ctg, dtm,na.rm = T)
@@ -231,7 +214,6 @@ knitr::kable(head(iris), format = 'html')
 # Segmentation
 
 
-
 ---
 
 ```{r eval=require('DT'), tidy=FALSE}
@@ -240,8 +222,6 @@ DT::datatable(
   fillContainer = FALSE, options = list(pageLength = 8)
 )
 ```
-
-
 
 
 ---
@@ -260,11 +240,11 @@ Question: what does `highlight.output = c(TRUE, FALSE)` mean? (Hint: think about
 
 ---
 
-class: center, middle
+class: inverse,center, middle
 
-# Thanks!
+# GRACIAS POR SU ATENCIÓN
 
-.footnote[[]Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan)]
+.footnote[Creado con R package [**xaringan**](https://github.com/yihui/xaringan)]
 
 
 
