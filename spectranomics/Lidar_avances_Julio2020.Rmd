@@ -10,7 +10,7 @@ output:
     lib_dir: libs
     nature:
       highlightStyle: github
-      ratio: '16:10'
+      ratio: '16:9'
       highlightLines: true
       countIncrementalSlides: false
       beforeInit: "macros.js"
@@ -33,7 +33,7 @@ class: inverse, center, middle
 ---
 #Área de prueba
 
-```{r ,eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',out.height= '70%',warning=FALSE,message=FALSE}
+```{r ,eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
 library(leaflet)
 library(tidyverse)
 library(sf)
@@ -183,7 +183,7 @@ classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_retu
 Modelo ejemplo para el área considerando parámetros anteriores e interpolación simple **tin()**
 
 ```{r comment='#',eval=F}
-# a boring regression
+
 #output name
 opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02b_dtm/dtm_v1_{XLEFT}_{YBOTTOM}'
 dtm <- grid_terrain(classify_ctg, res = 1, tin(), keep_lowest = FALSE)#<<
