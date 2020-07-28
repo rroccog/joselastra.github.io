@@ -33,7 +33,7 @@ class: inverse, center, middle
 ---
 #Área de prueba
 
-```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%', out.height='65%',warning=FALSE,message=FALSE}
+```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
 library(leaflet)
 library(tidyverse)
 library(sf)
