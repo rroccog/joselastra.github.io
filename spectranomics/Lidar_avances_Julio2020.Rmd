@@ -113,12 +113,12 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 - Optimiza el proceso de lectura y permite el trabajo multinúcleo.
 
 --
-- Se pueden aplicar las funciones a todos los archivos considerando procesamiento wall-to-wall asegurando ajuste entre los archivbos y chunks procesados
+- Se pueden aplicar las funciones a todos los archivos considerando procesamiento wall-to-wall asegurando ajuste entre los archivos y chunks procesados
 
 ---
 #Nube de puntos
 
-- Con *readLAS()* podemos abrir individualmente y visalizar
+- Con *readLAS()* podemos abrir individualmente y visualizar
 - Con *readLAScatalog()* podemos identificar la información de los archivos y visualizar los parámetros de procesamiento
 
 ```{r , echo=T,eval=F}
@@ -244,7 +244,7 @@ class: inverse,center, middle
 
 # GRACIAS POR SU ATENCIÓN
 
-.footnote[Creado con R package [**xaringan**](https://github.com/yihui/xaringan)]
+.footnote[Creado con [**xaringan**](https://github.com/yihui/xaringan)]
 
 
 
