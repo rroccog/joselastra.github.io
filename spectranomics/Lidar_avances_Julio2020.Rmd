@@ -194,24 +194,34 @@ class: inverse, middle, center
 ```{r eval=F}
 ##normalize, might take a little while to run
 opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02c_normalize/normalize_v1_{XLEFT}_{YBOTTOM}'
-normalize_ctg<- lasnormalize(classify_ctg, dtm,na.rm = T)
+normalize_ctg<- normalize_height(classify_ctg, dtm,na.rm = T)
 summary(normalize_ctg)
 lascheck(normalize_ctg)
 ```
 
 ---
 
-## CHM
+# CHM
 
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
+```{r eval=F}
+#CHM
+opt_output_files(normalize_ctg) <- '02_LiDAR/02_muestraOutput/02d_canopy/canopy_v1_{XLEFT}_{YBOTTOM}'
+chm<- grid_canopy(normalize_ctg, res=1,
+                  pitfree(thresholds = c(0,2,5,10,15,20), 
+                          max_edge = c(0, 1.5)))
+```
 
+.center[![:scale 32.5%](chm2.png)
+]
+.center[.footnote[CHM with kernel filter [3x3]]]
+---
 ```{r}
 knitr::kable(head(iris), format = 'html')
 ```
 
 ---
 
-# Segmentation
+# Segmentación
 
 
 ---
