@@ -33,7 +33,7 @@ class: inverse, center, middle
 ---
 #Área de prueba
 
-```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',out.height= '70%',warning=FALSE,message=FALSE}
+```{r ,eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',out.height= '70%',warning=FALSE,message=FALSE}
 library(leaflet)
 library(tidyverse)
 library(sf)
@@ -92,7 +92,7 @@ results [label= 'Resultados']
 
 # Aspectos críticos
 
-- **Tiempo de procesamiento**
+-  <ru-blockquote>Tiempo de procesamiento </ru-blockquote>
 - Clasificación de puntos
 - Generación de un buen DTM, normalización y buen CHM
 - Segmentación de copas óptima para el área
