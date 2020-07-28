@@ -6,11 +6,11 @@ institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
-    css: [fc]
+    #css: [fc-fonts]
     lib_dir: libs
     nature:
       highlightStyle: github
-      ratio: '16:9'
+      ratio: '16:10'
       highlightLines: true
       countIncrementalSlides: false
       beforeInit: "macros.js"
@@ -33,7 +33,7 @@ class: inverse, center, middle
 ---
 #Área de prueba
 
-```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
+```{r eval=require('leaflet'), echo=F, error=FALSE, out.width='100%', out.height='65%',warning=FALSE,message=FALSE}
 library(leaflet)
 library(tidyverse)
 library(sf)
@@ -132,8 +132,8 @@ opt_chunk_size(ctg) <- 250 #defining tiles for processing
 opt_chunk_buffer(ctg) <- 10 #defining buffer
 summary(ctg)
 ```
-.pull-left[![:scale 40%](las_cloud1.png)]
-.pull-right[![:scale 50%](summary_catalog.png)]
+.pull-left[![:scale 75%](las_cloud1.png)]
+.pull-right[![:scale 75%](summary_catalog.png)]
 
 
 ---
@@ -156,9 +156,8 @@ Método **Progressive Morphological Filter (pmf)**
 .center[
 Método **Cloth Simulation Function (csf)**
 
-![:scale 85%](CSF.svg)
+![:scale 90%](CSF.svg)
 ]
-
 .footnote[Roussel, Goodbody & Tompalski, 2020.]
 ---
 # Clasificación
