@@ -3,7 +3,7 @@ title: "Spectranomics"
 subtitle: "Avance LiDAR con 'lidR'"
 author: "José A. Lastra"
 institute: "Laboratorio Geo-Información y Percepción Remota"
-date: "`r Sys.Date()`"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
 output:
   xaringan::moon_reader:
     css: [fc]
@@ -113,7 +113,7 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 - Optimiza el proceso de lectura y permite el trabajo multinúcleo.
 
 --
-- Se pueden aplicar las funciones a todos los archivos considerando procesamiento wall-to-wall asegurando ajuste entre los archivos y chunks procesados
+- Se pueden aplicar las funciones a todos los archivos considerando procesamiento *wall-to-wall*, asegurando ajuste entre los archivos y chunks procesados
 
 ---
 #Nube de puntos
@@ -122,10 +122,9 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 - Con *readLAScatalog()* podemos identificar la información de los archivos y visualizar los parámetros de procesamiento
 
 ```{r , echo=T,eval=F}
-##processing options for classify
+##classify's processing options
 opt_chunk_size(ctg) <- 250 #defining tiles for processing
 opt_chunk_buffer(ctg) <- 10 #defining buffer
-summary(ctg)
 ```
 .center[![:scale 50%](las_cloud1.png)]
 
@@ -163,28 +162,17 @@ classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_retu
 .center[
 ![:scale 85%](las_cloud2.png)
 ]
-
+.left[.footnote[Puntos no clasificados como terreno]]
+.right[.footnote[Puntos clasificados como terreno]]
 ---
 # Generación de un buen DTM, normalización y buen CHM
 
 Modelo ejemplo para el área considerando parámetros anteriores e interpolación simple *tin()*
 
 ```{r comment='#',eval=F}
-#output name
-opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02b_dtm/dtm_v1_{XLEFT}_{YBOTTOM}'
 dtm <- grid_terrain(classify_ctg, res = 1, tin(), keep_lowest = FALSE)#<<
-plot_dtm3d(dtm, bg='transparent')
 ```
----
-class: inverse, middle, center
-
-# MODELO PARA TODA EL ÁREA
-
----
-background-image: url(dtm_ex.png)
-background-position: center
-background-size:contain
-
+.center[![:scale 78%](dtm_ex.png)]
 
 ---
 class: inverse, middle, center
@@ -195,59 +183,48 @@ class: inverse, middle, center
 #Normalización con DTM
 ```{r eval=F}
 ##normalize, might take a little while to run
-opt_output_files(classify_ctg) <- '02_LiDAR/02_muestraOutput/02c_normalize/normalize_v1_{XLEFT}_{YBOTTOM}'
 normalize_ctg<- normalize_height(classify_ctg, dtm,na.rm = T)
-summary(normalize_ctg)
-lascheck(normalize_ctg)
-```
 
+```
+.center[![:scale 75%](las_norm.png)]
 ---
 
 # CHM
 
 ```{r eval=F}
 #CHM
-opt_output_files(normalize_ctg) <- '02_LiDAR/02_muestraOutput/02d_canopy/canopy_v1_{XLEFT}_{YBOTTOM}'
 chm<- grid_canopy(normalize_ctg, res=1,
                   pitfree(thresholds = c(0,2,5,10,15,20), 
                           max_edge = c(0, 1.5)))
 ```
 
-.center[![:scale 32.5%](chm2.png)
+.center[![:scale 35%](chm2.png)
 ]
-.center[.footnote[CHM with kernel filter [3x3]]]
+.center[.footnote[CHM con filtro mediano [3x3]]]
 ---
-```{r}
-knitr::kable(head(iris), format = 'html')
-```
-
----
-
 # Segmentación
 
+--
+- Se requiere un algoritmo para la búsqueda *lmf()* o *manual()*
+
+--
+
+- La búsqueda será seteada para todo el catálogo asegurando no tener artefactos en los bordes de los chunks
+--
+
+.center[![:scale 40%](trees.png)]
+.center[.footnote[Ejemplo CHM con árboles detectados con algoritmo *lmf()*]]
+
 
 ---
+#Dalponte
 
-```{r eval=require('DT'), tidy=FALSE}
-DT::datatable(
-  head(iris, 10),
-  fillContainer = FALSE, options = list(pageLength = 8)
-)
-```
+
 
 
 ---
+#Li
 
-# Some Tips
-
-When you enable line-highlighting, you can also use the chunk option `highlight.output` to highlight specific lines of the text output from a code chunk. For example, `highlight.output = TRUE` means highlighting all lines, and `highlight.output = c(1, 3)` means highlighting the first and third line.
-
-
-```{r, highlight.output=c(1, 3), echo=FALSE}
-head(iris)
-```
-
-Question: what does `highlight.output = c(TRUE, FALSE)` mean? (Hint: think about R's recycling of vectors)
 
 
 ---
