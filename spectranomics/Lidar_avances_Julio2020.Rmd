@@ -127,9 +127,11 @@ opt_chunk_size(ctg) <- 250 #defining tiles for processing
 opt_chunk_buffer(ctg) <- 10 #defining buffer
 summary(ctg)
 ```
-.pull-left[![:scale 45%](las_cloud1.png)]
-.pull-right[![:scale 50%](summary_catalog.png)]
+.center[![:scale 50%](las_cloud1.png)]
 
+---
+.center[![:scale 50%](chunks.png)]
+.center[.footnote[Ejemplo de chunks (250 m) de procesamiento con buffers (10 m) para asegurar resultado sin artefactos de borde]]
 
 ---
 # Clasificación de puntos
@@ -153,13 +155,13 @@ Método **Cloth Simulation Function (csf)**
 # Clasificación
 
 Ejemplo: 
-```{r , echo=T,eval=F}
+```{r , echo=F,eval=F}
 ##defining output name and directory
 opt_output_files(ctg) <- '02_LiDAR/02_muestraOutput/02a_Ground/ground_{XLEFT}_{YBOTTOM}'
 classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_returns = T)
 ```
 .center[
-![:scale 65%](las_cloud2.png)
+![:scale 85%](las_cloud2.png)
 ]
 
 ---
