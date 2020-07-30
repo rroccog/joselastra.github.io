@@ -133,7 +133,7 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 opt_chunk_size(ctg) <- 250 #defining tiles for processing
 opt_chunk_buffer(ctg) <- 10 #defining buffer
 ```
-.center[![:scale 50%](las_cloud1.png)]
+.center[![:scale 80%](las_cloud1.png)]
 
 ---
 .center[![:scale 50%](chunks.png)]
@@ -193,19 +193,18 @@ class: inverse, middle, center
 normalize_ctg<- normalize_height(classify_ctg, dtm,na.rm = T)
 
 ```
-.center[![:scale 75%](las_norm.png)]
+.center[![:scale 90%](las_norm.png)]
 ---
 
 # CHM
 
 ```{r eval=F}
 #CHM
-chm<- grid_canopy(normalize_ctg, res=1,
-                  pitfree(thresholds = c(0,2,5,10,15,20), 
+chm<- grid_canopy(normalize_ctg, res=1,pitfree(thresholds = c(0,2,5,10,15,20), 
                           max_edge = c(0, 1.5)))
 ```
 
-.center[![:scale 35%](chm2.png)
+.center[![:scale 40%](chm2.png)
 ]
 .center[.footnote[CHM con filtro mediano [3x3]]]
 ---
@@ -219,7 +218,7 @@ chm<- grid_canopy(normalize_ctg, res=1,
 - La búsqueda será seteada para todo el catálogo asegurando no tener artefactos en los bordes de los chunks
 --
 
-.center[![:scale 40%](trees.png)]
+.center[![:scale 45%](trees.png)]
 .center[.footnote[Ejemplo CHM con árboles detectados con algoritmo *lmf()*]]
 
 
@@ -229,7 +228,7 @@ chm<- grid_canopy(normalize_ctg, res=1,
 ```{r, eval=FALSE}
 trees <- dalponte2016(chm = CHM, treetops = ttops,th_tree = 2)
 ```
-.center[![:scale 40%](trees_dalponte.png)]
+.center[![:scale 45%](trees_dalponte.png)]
 .center[.footnote[Ejemplo segmentación *Dalponte et al., 2016*: 12595 elementos]]
 
 
@@ -239,16 +238,21 @@ trees <- dalponte2016(chm = CHM, treetops = ttops,th_tree = 2)
 ```{r eval=F}
 trees <- silva2016(chm = CHM, treetops = ttops,max_cr_factor = 0.7)
 ```
-.center[![:scale 40%](trees_silva.png)]
+.center[![:scale 45%](trees_silva.png)]
 .center[.footnote[Ejemplo segmentación *Silva et al., 2016*: 12595 elementos]]
 
 ---
 
-class: inverse,center, middle
+class: center, middle
 
 # GRACIAS POR SU ATENCIÓN
 
-.footnote[Creado con [**xaringan**](https://github.com/yihui/xaringan)]
+.center[![:scale 50%](logo_labgrs_color.png)]
+---
+
+class: inverse,center, middle
+
+
 
 
 
