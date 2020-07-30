@@ -217,15 +217,23 @@ chm<- grid_canopy(normalize_ctg, res=1,
 
 
 ---
-#Dalponte
+#Dalponte et al., 2016
 
-
+```{r, eval=FALSE}
+trees <- dalponte2016(chm = CHM, treetops = ttops,th_tree = 2)
+```
+.center[![:scale 40%](trees_dalponte.png)]
+.center[.footnote[Ejemplo segmentación *Dalponte et al., 2016*: 12595 elementos]]
 
 
 ---
-#Li
+#Silva et al., 2016
 
-
+```{r eval=F}
+trees <- silva2016(chm = CHM, treetops = ttops,max_cr_factor = 0.7)
+```
+.center[![:scale 40%](trees_silva.png)]
+.center[.footnote[Ejemplo segmentación *Silva et al., 2016*: 12595 elementos]]
 
 ---
 
