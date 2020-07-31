@@ -242,6 +242,14 @@ trees <- silva2016(chm = CHM, treetops = ttops,max_cr_factor = 0.7)
 .center[.footnote[Ejemplo segmentación *Silva et al., 2016*: 12595 elementos]]
 
 ---
+#Watershed
+
+```{r eval=F, echo=F}
+trees <- silva2016(chm = CHM, treetops = ttops,max_cr_factor = 0.7)
+```
+.center[![:scale 50%](trees_watershed.png)]
+.center[.footnote[Ejemplo segmentación *watershed*: 5712 elementos]]
+---
 
 class: center, middle
 
