@@ -1,0 +1,266 @@
+---
+title: "Spectranomics"
+subtitle: "Avance LiDAR con 'lidR'"
+author: "José A. Lastra"
+institute: "Laboratorio Geo-Información y Percepción Remota"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output:
+  xaringan::moon_reader:
+    css: [fc]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      ratio: '16:9'
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+      
+---
+
+background-image: url(logo_labgrs_color.png)
+background-position: center
+background-size:50%
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+---
+class: inverse, center, middle
+
+# INTRODUCCIÓN
+
+---
+#Área de prueba
+
+```{r ,eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
+library(leaflet)
+library(tidyverse)
+library(sf)
+
+uso<-read_sf('BNSM_20070_cuyinco_alto.shp')
+uso<-st_transform(uso,'+proj=longlat +datum=WGS84 +no_defs ') %>% as_Spatial()
+shp<-read_sf('extent_lidar.shp') 
+predios<-read_sf('PREDIOS_Hiperespectral.shp')
+shp<-st_transform(shp,'+proj=longlat +datum=WGS84 +no_defs ') %>% as_Spatial()
+predios<-st_transform(predios,'+proj=longlat +datum=WGS84 +no_defs ') %>% as_Spatial()
+
+leaflet()%>% addTiles()%>% 
+  addPolygons(data = uso,color = 'green', weight = 1,popup = ~GLOSADESCR,smoothFactor = 0.5,
+    opacity = 0.5, fillOpacity = 0.5,group = 'Nativo') %>% 
+  addPolygons(data = predios,color = 'blue', weight = 1, popup = ~NOMBRE,smoothFactor = 0.5,
+    opacity = 0.5, fillOpacity = 0.5,group = 'Predios') %>% 
+  addPolygons(data = shp,color = 'yellow', weight = 1, smoothFactor = 0.5,
+    opacity = 1.0, fillOpacity = 0.5,highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE),group = 'Lidar 1x1 km')%>%
+  addLayersControl(overlayGroups = c("Nativo", "Predios","Lidar 1x1 km"),
+    options = layersControlOptions(collapsed = T)) %>% hideGroup(c("Nativo"))%>% addProviderTiles("CartoDB.PositronOnlyLabels")
+
+```
+
+- Área: 1.08 km²
+- Densidad: 40.8 points/m²
+---
+# LiDAR usando R
+
+- Uso de paquete lidR: Roussel, J. R., Auty, D., DeFlorian, B., & Meador, A. S. (2020). *lidR: Airborne LiDAR Data Manipulation and Visualization for Forestry Applications*, version 3.0.2, acceso: 05 de Julio 2020, Recuperado de: [CRAN](https://CRAN.R-project.org/package=lidR)
+--
+```{r out.width='100%',  fig.height=2, eval=require('DiagrammeR'), echo=F,eval=T}
+library(DiagrammeR)
+grViz("digraph {
+
+graph [layout = dot, rankdir = LR]
+
+# define the global styles of the nodes. We can override these in box if we wish
+node [shape = rectangle, style = filled, fillcolor = Linen]
+
+data1 [label = 'LAS files', shape = folder, fillcolor = Beige]
+process1 [label =  'Clasificación \n de puntos']
+process2 [label = 'Generación \n DTM']
+process3 [label =  'Normalización \n de nube de puntos']
+process4 [label = 'Canopy Height Model \n (CHM)']
+process5 [label = 'Segmentación']
+results [label= 'Resultados']
+
+# edge definitions with the node IDs
+{data1}  -> process1 -> process2 -> process3 -> process4 -> process5 -> results
+}")
+```
+
+--
+##Aspectos críticos
+- Tiempo de procesamiento;
+- Clasificación de puntos;
+- Generación de un buen DTM, normalización y buen CHM;
+- Segmentación de copas óptima para el área;
+
+
+---
+
+# Tiempo de procesamiento 
+
+.pull-left[
+```{r ex1,eval=F}
+las<-readLAS('02_LiDAR/01_Muestra/648_5830_3.laz’)
+46.86 segundos#<<
+```
+]
+.pull-right[
+```{r ex2,eval=F}
+las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
+3.48 segundos#<<
+```
+]
+
+
+--
+- La función *readLAScatalog()* permite el procesamiento de un archivo completo o de un conjunto de archivos considerando parámetros fijados por el usuario.
+
+--
+- Optimiza el proceso de lectura y permite el trabajo multinúcleo.
+
+--
+- Se pueden aplicar las funciones a todos los archivos considerando procesamiento *wall-to-wall*, asegurando ajuste entre los archivos y chunks procesados
+
+---
+#Nube de puntos
+
+- Con *readLAS()* podemos abrir individualmente y visualizar
+- Con *readLAScatalog()* podemos identificar la información de los archivos y visualizar los parámetros de procesamiento
+
+```{r , echo=T,eval=F}
+##classify's processing options
+opt_chunk_size(ctg) <- 250 #defining tiles for processing
+opt_chunk_buffer(ctg) <- 10 #defining buffer
+```
+.center[![:scale 80%](las_cloud1.png)]
+
+---
+.center[![:scale 50%](chunks.png)]
+.center[.footnote[Ejemplo de chunks (250 m) de procesamiento con buffers (10 m) para asegurar resultado sin artefactos de borde]]
+
+---
+# Clasificación de puntos
+
+.center[
+Método **Progressive Morphological Filter (pmf)**
+
+![data](PMF.svg)
+]
+
+.footnote[Roussel, Goodbody & Tompalski, 2020.]
+---
+
+.center[
+Método **Cloth Simulation Function (csf)**
+
+![:scale 90%](CSF.svg)
+]
+.footnote[Roussel, Goodbody & Tompalski, 2020.]
+---
+# Clasificación
+
+Ejemplo: 
+```{r , echo=F,eval=F}
+##defining output name and directory
+opt_output_files(ctg) <- '02_LiDAR/02_muestraOutput/02a_Ground/ground_{XLEFT}_{YBOTTOM}'
+classify_ctg<- classify_ground(ctg,csf(sloop_smooth = T,rigidness = 2),last_returns = T)
+```
+.center[
+![:scale 85%](las_cloud2.png)
+]
+.left[.footnote[Puntos no clasificados como terreno]]
+.right[.footnote[Puntos clasificados como terreno]]
+---
+# Generación de un buen DTM, normalización y buen CHM
+
+Modelo ejemplo para el área considerando parámetros anteriores e interpolación simple *tin()*
+
+```{r comment='#',eval=F}
+dtm <- grid_terrain(classify_ctg, res = 1, tin(), keep_lowest = FALSE)#<<
+```
+.center[![:scale 78%](dtm_ex.png)]
+
+---
+class: inverse, middle, center
+
+# NORMALIZACIÓN y CHM
+---
+
+#Normalización con DTM
+```{r eval=F}
+##normalize, might take a little while to run
+normalize_ctg<- normalize_height(classify_ctg, dtm,na.rm = T)
+
+```
+.center[![:scale 90%](las_norm.png)]
+---
+
+# CHM
+
+```{r eval=F}
+#CHM
+chm<- grid_canopy(normalize_ctg, res=1,pitfree(thresholds = c(0,2,5,10,15,20), 
+                          max_edge = c(0, 1.5)))
+```
+
+.center[![:scale 40%](chm2.png)
+]
+.center[.footnote[CHM con filtro mediano [3x3]]]
+---
+# Segmentación
+
+--
+- Se requiere un algoritmo para la búsqueda *lmf()* o *manual()*
+
+--
+
+- La búsqueda será seteada para todo el catálogo asegurando no tener artefactos en los bordes de los chunks
+--
+
+.center[![:scale 45%](trees.png)]
+.center[.footnote[Ejemplo CHM con árboles detectados con algoritmo *lmf()*]]
+
+
+---
+#Dalponte et al., 2016
+
+```{r, eval=FALSE}
+trees <- dalponte2016(chm = CHM, treetops = ttops,th_tree = 2)
+```
+.center[![:scale 45%](trees_dalponte.png)]
+.center[.footnote[Ejemplo segmentación *Dalponte et al., 2016*: 12595 elementos]]
+
+
+---
+#Silva et al., 2016
+
+```{r eval=F}
+trees <- silva2016(chm = CHM, treetops = ttops,max_cr_factor = 0.7)
+```
+.center[![:scale 45%](trees_silva.png)]
+.center[.footnote[Ejemplo segmentación *Silva et al., 2016*: 12595 elementos]]
+
+---
+#Watershed
+
+```{r eval=F, echo=F}
+trees <- silva2016(chm = CHM, treetops = ttops,max_cr_factor = 0.7)
+```
+.center[![:scale 50%](trees_watershed.png)]
+.center[.footnote[Ejemplo segmentación *watershed*: 5712 elementos]]
+---
+
+class: center, middle
+
+# GRACIAS POR SU ATENCIÓN
+
+.center[![:scale 50%](logo_labgrs_color.png)]
+---
+
+class: inverse,center, middle
+
+
+
+
+
