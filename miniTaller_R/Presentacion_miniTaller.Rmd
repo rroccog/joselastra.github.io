@@ -130,10 +130,8 @@ las<-readLAScatalog('02_LiDAR/01_Muestra/648_5830_3.laz’)
 ##Correlación
 ```{r eval=T,echo=F,fig.retina=T,warning=F,message=F,error=F}
 library(sf)
-library(plotly)
-shp<-read_sf('CIMAR 20/cimar_20_dots.shp')
-chile<-read_sf('cl_continental_geo.shp')
 
+shp<-read_sf('cimar_20_dots.shp')
 
 ggplot() + geom_sf(data = shp) + theme_bw()
 
