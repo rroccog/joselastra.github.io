@@ -1,7 +1,7 @@
 ---
-title: "Spectranomics"
-subtitle: "Avance LiDAR con 'lidR'"
-author: "José A. Lastra"
+title: "Mini-Taller R"
+subtitle: "Introducció al análisis de datos con R"
+author: "Mg. José A. Lastra"
 institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r format(Sys.time(), '%d/%m/%Y')`"
 output:
@@ -33,7 +33,7 @@ class: inverse, center, middle
 ---
 #Área de prueba
 
-```{r ,eval=require('leaflet'), echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
+```{r ,eval=F, echo=F, error=FALSE, out.width='100%',warning=FALSE,message=FALSE}
 library(leaflet)
 library(tidyverse)
 library(sf)
