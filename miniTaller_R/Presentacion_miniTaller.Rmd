@@ -155,7 +155,7 @@ class: inverse, center, middle
 library(sf)
 library(leaflet)
 
-shp<-read_sf('cimar_20_dots.shp')
+shp<-read_sf('cimar_20_dots.shp') %>% as_Spatial()
 
 leaflet(shp) %>% addProviderTiles('Esri.WorldImagery')%>% 
  addProviderTiles("TomTom.Labels") %>%
