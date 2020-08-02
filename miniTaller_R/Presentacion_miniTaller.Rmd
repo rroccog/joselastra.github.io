@@ -151,7 +151,7 @@ class: inverse, center, middle
 # Jugando con el laboratorio 2
 ---
 
-```{r eval=T,echo=F,fig.retina=T,warning=F,message=F,error=F,out.width='100%',out.height='100%'}
+```{r eval=T,echo=F,fig.retina=T,warning=F,message=F,error=F,out.width='100%'}
 library(sf)
 library(leaflet)
 
