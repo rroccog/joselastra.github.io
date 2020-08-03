@@ -23,6 +23,7 @@ background-size:50%
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
+library(tidyverse)
 library(corrplot)
 library(readxl)
 library(npphen)
@@ -89,7 +90,7 @@ CTD.sub %>%
 
 ```{r  echo=T,eval=T}
 #Forma 3
-CTD.sub <- CTD %>% select(`Temperatura (°C)`, `Sigma T (Kg/m3)`, `Salinidad (UPS)`,`Oxigeno (ml/L)`)
+CTD.sub <- CTD %>% dplyr::select(`Temperatura (°C)`, `Sigma T (Kg/m3)`, `Salinidad (UPS)`,`Oxigeno (ml/L)`)
 
 ```
 --
@@ -207,7 +208,7 @@ Exploremos un poco nuestros datos:
 ```{r warning=F,error=F,message=F,fig.width=3.5,fig.retina=2,fig.align='center'}
 #grafiquemos la información
 plot(x = estacion$`TEMPERATURA (°C)`,y = estacion$`PROFUNDIDAD (m)`*-1, type='l',xlab='Temp (°C)',
-     ylab='Depth (m)',bg='transparent')
+     ylab='Depth (m)',bg='#FAFAFA')
 
 ```
 
@@ -237,7 +238,7 @@ Con estos datos ya se puede realizar un análisis, pero siempre es bueno recurri
 p <- cor.mtest (est.num, conf.level = .95)
 #graficando correlaciones significativas
 corrplot(est.num,method ="number", type="upper",sig.level = 0.05,
-         p.mat =p$p,insig = "blank")#correlation matrix
+         p.mat =p$p,insig = "blank",bg = '#FAFAFA')#correlation matrix
 ```
 
 ---
@@ -249,13 +250,13 @@ Consideremos una estación con influencia glaciar y el mismo nivel de significan
 
 ```{r warning=F,error=F,message=F}
 #estación interior
-estacion <- cimar %>% filter(ESTACIÓN == 19) %>% as.data.frame()
+estacion12 <- cimar %>% filter(ESTACIÓN == 12) %>% as.data.frame()
 
 ```
 
 ```{r fig.retina=2,fig.align='center', echo=F}
 #columnas de interés
-estacion.cor<-estacion[,c(9:11)]
+estacion.cor<-estacion12[,c(9:11)]
 #matriz numérica
 est.num <- cor(estacion.cor)
 #calculando significancia
@@ -266,19 +267,139 @@ corrplot(est.num,method ="number", type="upper",sig.level = 0.05,
 ```
 ---
 #¿Cambia según profundidad?
+
 --
+Filtrando la información
 ```{r}
-P020 <- estacion %>% filter(`PROFUNDIDAD (m)` <= 20) %>% as.data.frame()
-P20 <- estacion %>% filter(`PROFUNDIDAD (m)` > 20) %>% as.data.frame()
+P020 <- estacion12 %>% filter(`PROFUNDIDAD (m)` <= 20) %>% as.data.frame()
+P20 <- estacion12 %>% filter(`PROFUNDIDAD (m)` > 20) %>% as.data.frame()
+```
+--
+Construyendo matriz de correlación
+```{r}
+#seleccionando columnas  <= 20 m
+P020.sub <-as.data.frame (P020[,9:11]) 
+#matriz numérica < 20 m
+P020.num <- cor (P020.sub )
+
+#seleccionando columnas  > 20 m
+P20.sub <-as.data.frame (P20[,9:11])
+#matriz numérica > 20 m
+P20.num <- cor (P20.sub )
+
 ```
 
 ---
+#Correlación 0-20 m
+```{r fig.retina=2,fig.align='center', echo=F}
 
+library(ggcorrplot)
+ggcorrplot(P020.num, hc.order = TRUE, type = "upper",
+   lab = TRUE,colors = c("#6D9EC1", "white", "#E46726"))
+
+```
+
+---
+#Correlación > 20 m
+```{r fig.retina=2,fig.align='center', echo=F}
+
+library(ggcorrplot)
+ggcorrplot(P20.num, hc.order = TRUE, type = "upper",
+   lab = TRUE,colors = c("#6D9EC1", "white", "#E46726"))
+
+```
+
+---
+class: inverse,center, middle
+
+# Jugando con las series de tiempo
+
+---
+#Leyendo y visualizando la serie
+
+```{r warning=F,message=F,error=F}
+ts.data<-read.csv('Iquique_TS.csv')
+```
+
+```{r echo=F}
+ts.data %>% 
+  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 4))
+```
+
+---
+```{r echo=T}
+g <- ggplot(data = ts.data,aes(x=as.Date(fechas),y=sst)) + geom_line(lwd=0.5) +  
+  xlab('') + ylab('SST (°C)') + theme_bw()
+```
+
+```{r echo=F, error=F, message=F, warning=F, out.width='100%'}
+library(plotly)
+ggplotly(g,height = 400,tooltip = c('sst'))
+```
+
+---
+#npphen
+
+--
+```{r fig.retina=2, fig.align='center',fig.height= 5}
+#data prep
+fechas<-as.Date(ts.data$fechas, format("%Y-%m-%d"))
+ts.data$fechas<-fechas
+#Fenología
+PhenKplot(x = ts.data$sst,dates = ts.data$fechas,h = 2,
+          nGS = 365,rge = c(12.5,28),xlab = '',ylab = 'SST (°C)')
+```
+
+---
+#Descomponiendo nuestra serie
+--
+```{r fig.retina=2, fig.align='center',fig.width=12,fig.height=6}
+#creando objeto time-series
+ts.iquique<-ts(ts.data[,3],start = c(1981,9),frequency = 365)
+#descomponiendo y graficando
+ts.iquique %>% decompose() %>% plot()
+```
+
+---
+#Veamos solo la tendencia y los observados
+
+--
+Crearemos una tabla con la información de original y la tendencia descompuesta
+
+```{r}
+#objeto con descomposición
+ts.decompose<- ts.iquique %>% decompose()
+
+#creando minitablas para graficar
+serie<-data.frame(sst=ts.decompose$x, categoria='Serie original', fechas=fechas)
+tendencia<- data.frame(sst=ts.decompose$trend, categoria='tendencia', fechas=fechas)
+
+#peguemos los datos
+serie.ts<-list(serie, tendencia) %>% reduce(bind_rows)
+```
+
+--
+```{r}
+#grafiquemos
+g<-ggplot(data = serie.ts,aes(x=fechas, y= sst, color=categoria)) + 
+  geom_line() + xlab('') + ylab('SST (°C)') + 
+  scale_x_date(labels=date_format("%Y"), breaks=date_breaks(width="2 year"), 
+               limits=c(as.Date('1981-8-1'), as.Date('2019-4-30'))) + theme_bw()
+
+```
+
+---
 class: center, middle
+```{r echo=F, error=F, message=F, warning=F, out.width='100%'}
+library(plotly)
+ggplotly(g,height = 350,tooltip = c('sst'))
+```
+---
+
+class: inverse,center, middle
 
 # GRACIAS POR SU ATENCIÓN
 
-.center[![:scale 50%](logo_labgrs_color.png)]
 ---
 
 class: inverse,center, middle
