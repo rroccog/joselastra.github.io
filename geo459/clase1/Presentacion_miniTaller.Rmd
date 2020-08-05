@@ -158,7 +158,8 @@ library(leaflet)
 
 shp<-read_sf('cimar_20_dots.shp') %>% as_Spatial()
 
-leaflet(shp) %>% addProviderTiles('Esri.WorldImagery') %>%
+leaflet(shp) %>% addProviderTiles('Esri.WorldImagery')%>% 
+ addProviderTiles("TomTom.Labels") %>%
   addCircles(popup = ~ESTACIÃ.e2..U.0080.,radius = ~DENSIDAD..*4,color = 'red')
 
 ```
@@ -207,7 +208,7 @@ Exploremos un poco nuestros datos:
 ```{r warning=F,error=F,message=F,fig.width=3.5,fig.retina=2,fig.align='center'}
 #grafiquemos la información
 plot(x = estacion$`TEMPERATURA (°C)`,y = estacion$`PROFUNDIDAD (m)`*-1, type='l',xlab='Temp (°C)',
-     ylab='Depth (m)')
+     ylab='Depth (m)',bg='#FAFAFA')
 
 ```
 
@@ -237,7 +238,7 @@ Con estos datos ya se puede realizar un análisis, pero siempre es bueno recurri
 p <- cor.mtest (est.num, conf.level = .95)
 #graficando correlaciones significativas
 corrplot(est.num,method ="number", type="upper",sig.level = 0.05,
-         p.mat =p$p,insig = "blank")#correlation matrix
+         p.mat =p$p,insig = "blank",bg = '#FAFAFA')#correlation matrix
 ```
 
 ---
@@ -326,7 +327,6 @@ ts.data %>%
 ```
 
 ---
-class: middle
 ```{r echo=T}
 g <- ggplot(data = ts.data,aes(x=as.Date(fechas),y=sst)) + geom_line(lwd=0.5) +  
   xlab('') + ylab('SST (°C)') + theme_bw()
@@ -334,7 +334,7 @@ g <- ggplot(data = ts.data,aes(x=as.Date(fechas),y=sst)) + geom_line(lwd=0.5) +
 
 ```{r echo=F, error=F, message=F, warning=F, out.width='100%'}
 library(plotly)
-ggplotly(g,height = 350,tooltip = c('sst'))
+ggplotly(g,height = 400,tooltip = c('sst'))
 ```
 
 ---
@@ -381,7 +381,7 @@ serie.ts<-list(serie, tendencia) %>% reduce(bind_rows)
 --
 ```{r}
 #grafiquemos
-g <- ggplot(data = serie.ts,aes(x=fechas, y= sst, color=categoria)) + 
+g<-ggplot(data = serie.ts,aes(x=fechas, y= sst, color=categoria)) + 
   geom_line() + xlab('') + ylab('SST (°C)') + 
   scale_x_date(labels=date_format("%Y"), breaks=date_breaks(width="2 year"), 
                limits=c(as.Date('1981-8-1'), as.Date('2019-4-30'))) + theme_bw()
@@ -394,79 +394,15 @@ class: center, middle
 library(plotly)
 ggplotly(g,height = 350,tooltip = c('sst'))
 ```
-
----
-class: inverse, center, middle
-
-#¿Qué viene después?
-
----
-#Expandiendo el análisis: datos mensuales
-
---
-
-```{r fig.retina= 2, out.width='100%',fig.height=3,out.height='100%'}
-data.monthly <- ts.data %>%
-  tq_transmute(select     = sst, mutate_fun = apply.monthly,
-               FUN        = median, na.rm=T)
-##plot
-plot(data.monthly$fechas,data.monthly$sst,type='l',xlab='',ylab='SST (°C)')
-```
----
-# Usemos una serie adicional
---
-```{r}
-library(rsoi) 
-oni<-download_enso(climate_idx = 'oni')
-summary(oni)
-```
-
----
-class: middle
-```{r fig.retina=2, fig.align='center', fig.width=16,fig.height=4.5}
-plot(oni$Date,oni$ONI,col='black',type = 'l',xlim = as.Date(c('1981-09-30','2020-01-01')),
-     xlab='',ylab='SST anomaly (°C)')
-abline(h = 0,col='blue',lwd=2)
-
-```
-
----
-#Ajustando las series
-```{r}
-oni_filter <- oni %>% filter(Date>=as.Date('1981-09-30') & Date<=as.Date('2020-01-01'))
-iquique <- data.monthly %>% filter(fechas>=as.Date('1981-09-30') & fechas<=as.Date('2020-01-01'))
-
-#correlación simple
-cor(oni_filter$ONI, iquique$sst)
-
-#Correlación cruzada
-ccfvalues <- ccf(oni_filter$ONI, iquique$sst,lag.max = 150,plot = F)
-```
-
----
-#Unamos los datos y grafiquemos
-```{r}
-#datos
-ccf.df <- data.frame(lags=ccfvalues[["lag"]],correlacion=ccfvalues[["acf"]])
-
-g <- ggplot(data = ccf.df,aes(x=lags,y=correlacion))+   geom_bar(stat = 'identity') +
-    geom_hline(yintercept=.09, color = 'blue', linetype = 'dashed') +
-    geom_hline(yintercept=-.09, color = 'blue', linetype = 'dashed') + theme_bw()
-
-```
-
-```{r echo=F, error=F, message=F, warning=F, out.width='100%'}
-library(plotly)
-ggplotly(g,height = 350)
-```
-
 ---
 
 class: inverse,center, middle
 
-# ¿PREGUNTAS?
+# GRACIAS POR SU ATENCIÓN
 
+---
 
+class: inverse,center, middle
 
 
 
