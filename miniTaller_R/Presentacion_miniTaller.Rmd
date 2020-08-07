@@ -44,20 +44,26 @@ class: inverse, center, middle
 ---
 #Lectura básica de datos
 
+--
+En R podemos leer muchos tipos de datos (tablas, bases de datos, shapefiles, imágenes, etc.)
+
+--
+
 ```{r ,eval=T, echo=T, error=FALSE,warning=FALSE,message=FALSE}
 
 #read data frames
 CTD <- read_excel("Araucania2018_CTD_C1.xls")
 ```
 
-
 ```{r echo=F}
 CTD %>% 
-  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 5))
+  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
 ```
 
 ---
 # Seleccionando datos dentro de nuestro data frame
+
+--
 # Columnas
 
 - Seleccionar datos puede ser bastante flexible y dependerá de lo que nos resulte más cómodo o más eficiente.
@@ -116,6 +122,7 @@ CTD_50 %>%
 ```
 
 ---
+--
 ```{r eval=T}
 ##seleccionando registros según condiciones
 CTD_nehuentue2 <- filter(CTD, Estaciones=='Nehuentué2')
@@ -124,6 +131,7 @@ CTD_nehuentue2 <- filter(CTD, Estaciones=='Nehuentué2')
 CTD_nehuentue2 <- CTD %>% filter(Estaciones=='Nehuentué2')
 ```
 
+--
 ```{r echo=F}
 CTD_nehuentue2 %>% 
   datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
@@ -132,6 +140,7 @@ CTD_nehuentue2 %>%
 ---
 #¿Y si quiero las estaciones a 2, 5 y 10 millas?
 
+--
 ```{r eval=T}
 ##seleccionando registros 
 estaciones <- unique(CTD$Estaciones)[1:3]
@@ -159,7 +168,7 @@ library(leaflet)
 shp<-read_sf('cimar_20_dots.shp') %>% as_Spatial()
 
 leaflet(shp) %>% addProviderTiles('Esri.WorldImagery') %>%
-  addCircles(popup = ~ESTACIÃ.e2..U.0080.,radius = ~DENSIDAD..*4,color = 'red')
+  addCircles(label = ~ESTACIÃ.e2..U.0080.,radius = ~DENSIDAD..*4,color = 'red')
 
 ```
 
@@ -184,6 +193,7 @@ head(cimar) %>%
 ```
 
 ---
+--
 ```{r warning=F,error=F,message=F}
 #filtrar datos
 estacion<-as.data.frame(filter(cimar, ESTACIÓN == 2))
@@ -192,6 +202,7 @@ estacion<-cimar %>% filter(ESTACIÓN == 2) %>% as.data.frame()
 
 ```
 
+--
 ```{r warning=F,error=F,message=F, echo=F}
 
 head(estacion) %>%
@@ -203,7 +214,7 @@ Exploremos un poco nuestros datos:
 - Podemos usar *summary()*, *head()* o graficar los datos con *plot()* o usar *ggplot()*
 
 ---
-
+--
 ```{r warning=F,error=F,message=F,fig.width=3.5,fig.retina=2,fig.align='center'}
 #grafiquemos la información
 plot(x = estacion$`TEMPERATURA (°C)`,y = estacion$`PROFUNDIDAD (m)`*-1, type='l',xlab='Temp (°C)',
@@ -327,6 +338,7 @@ ts.data %>%
 
 ---
 class: middle
+
 ```{r echo=T}
 g <- ggplot(data = ts.data,aes(x=as.Date(fechas),y=sst)) + geom_line(lwd=0.5) +  
   xlab('') + ylab('SST (°C)') + theme_bw()
@@ -432,13 +444,20 @@ abline(h = 0,col='blue',lwd=2)
 
 ---
 #Ajustando las series
+
 ```{r}
 oni_filter <- oni %>% filter(Date>=as.Date('1981-09-30') & Date<=as.Date('2020-01-01'))
 iquique <- data.monthly %>% filter(fechas>=as.Date('1981-09-30') & fechas<=as.Date('2020-01-01'))
+```
 
+--
+```{r}
 #correlación simple
 cor(oni_filter$ONI, iquique$sst)
+```
 
+--
+```{r}
 #Correlación cruzada
 ccfvalues <- ccf(oni_filter$ONI, iquique$sst,lag.max = 150,plot = F)
 ```
@@ -455,6 +474,7 @@ g <- ggplot(data = ccf.df,aes(x=lags,y=correlacion))+   geom_bar(stat = 'identit
 
 ```
 
+--
 ```{r echo=F, error=F, message=F, warning=F, out.width='100%'}
 library(plotly)
 ggplotly(g,height = 350)
