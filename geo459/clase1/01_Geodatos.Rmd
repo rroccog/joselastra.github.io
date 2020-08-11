@@ -1,6 +1,6 @@
 ---
 title: "Unidad 1: Repaso geo-datos"
-subtitle: "Curso: GEO 459 <br>[Instituto de Geografía]<br>"
+subtitle: "Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>"
 author: "Mg. José A. Lastra"
 institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r format(Sys.time(), '%d/%m/%Y')`"
@@ -18,7 +18,7 @@ output:
 ---
 background-image: url(logo_labgrs_color.png)
 background-position: center
-background-size:50%
+background-size:40%
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
