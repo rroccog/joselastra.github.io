@@ -52,7 +52,7 @@ Estas permiten la lectura, manipulación básica y avanzada de datos. Además de
 ---
 class: inverse, center, middle
 
-# Lectura de datos alfanuméricos
+# LECTURA DE DATOS ALFANUMÉRICOS
 
 ---
 
@@ -83,7 +83,8 @@ CTD %>%
 ```{r  echo=T,eval=T}
 #Forma 1
 CTD.sub <- CTD[,6:9] %>% as.data.frame()
-
+#esto es lo mismo
+CTD.sub <- as.data.frame(CTD[,6:9])
 ```
 
 ```{r echo=F}
@@ -97,6 +98,9 @@ CTD.sub %>%
 columnas <- colnames(CTD)[6:9]
 CTD.sub <- CTD[,columnas] %>% as.data.frame()
 
+#esto es lo mismo
+CTD.sub <- as.data.frame(CTD[,columnas])
+
 ```
 --
 ```{r echo=F}
@@ -109,7 +113,8 @@ CTD.sub %>%
 ```{r  echo=T,eval=T}
 #Forma 3
 CTD.sub <- CTD %>% dplyr::select(`Temperatura (°C)`, `Sigma T (Kg/m3)`, `Salinidad (UPS)`,`Oxigeno (ml/L)`)
-
+#esto es lo mismo
+CTD.sub <- dplyr::select(CTD, `Temperatura (°C)`, `Sigma T (Kg/m3)`, `Salinidad (UPS)`,`Oxigeno (ml/L)`)
 ```
 --
 ```{r echo=F}
@@ -138,6 +143,9 @@ CTD_50 %>%
 ```{r eval=T}
 ##seleccionando registros según condiciones
 CTD_nehuentue2 <- CTD %>% filter(Estaciones=='Nehuentué2')
+
+#esto es lo mismo
+CTD_nehuentue2 <- filter(CTD, Estaciones=='Nehuentué2')
 ```
 
 --
@@ -154,6 +162,8 @@ CTD_nehuentue2 %>%
 ##seleccionando registros 
 estaciones <- unique(CTD$Estaciones)[1:3]
 CTD_nehuentue <- CTD %>% filter(Estaciones %in% estaciones)
+#esto es lo mismo 
+CTD_nehuentue <- filter(CTD, Estaciones %in% estaciones)
 ```
 
 --
@@ -161,10 +171,6 @@ CTD_nehuentue <- CTD %>% filter(Estaciones %in% estaciones)
 CTD_nehuentue %>% 
   datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
 ```
----
-class: inverse, center, middle
-
-# Lectura de datos alfanuméricos
 
 ---
 
@@ -264,5 +270,5 @@ class: inverse,center, middle
 
 class: inverse,center, middle
 
-# PÓXIMA SEMANA REPASO GEODATOS!
+# PRÓXIMA SEMANA REPASO GEODATOS!
 
