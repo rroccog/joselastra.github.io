@@ -23,14 +23,8 @@ background-size:40%
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 library(tidyverse)
-library(corrplot)
 library(readxl)
-library(npphen)
-library(TTR)
 library(scales)
-library(ggplot2)
-library(tidyquant)
-library(dplyr)
 library(DT)
 
 ```
@@ -43,7 +37,6 @@ Librerías utilizadas en esta sesión
 ```{r eval=F}
 library(tidyverse)
 library(readxl)
-library(TTR)
 library(scales)
 
 ```
@@ -89,7 +82,7 @@ CTD.sub <- as.data.frame(CTD[,6:9])
 
 ```{r echo=F}
 CTD.sub %>% 
-  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 5))
+  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
 ```
 ---
 
@@ -225,39 +218,37 @@ ggplot(data = ts.data,aes(x=as.Date(fechas),y=sst)) + geom_line(lwd=0.5) +
 Más manipulación de datos
 --
 ```{r}
-#creando objeto time-series
-ts.iquique <- ts(ts.data[,3],start = c(1981,9),frequency = 365)
-
+#leyendo archivo
+ingresos <- read_excel('Ingresos.xls')
+summary(ingresos)
 ```
 
---
+---
 ```{r}
-#objeto con descomposición
-ts.decompose <- ts.iquique %>% decompose()
+#Filtremos datos
+#creando cuartiles
+q <- ingresos$ing_familiar %>% quantile(prob = seq(0, 1, length = 11)) %>% as.vector() 
+#filtrando los más ricos
+mas_ricos <- ingresos %>% filter(ing_familiar >= q[10]) %>% 
+  mutate(descripcion = '10% más rico')
+#filtrando al resto
+ni_tan_ricos <- ingresos %>% filter(ing_familiar < q[10]) %>% 
+  mutate(descripcion = '90% de la población')
 ```
---
-```{r}
-#creando objeto fechas
-fechas <- as.Date(ts.data$fechas, format='%Y-%m-%d')
 
-#creando minitablas para graficar
-serie <- data.frame(sst=ts.decompose$x, categoria='Serie original', fechas=fechas)
-tendencia <- data.frame(sst=ts.decompose$trend, categoria='tendencia', fechas=fechas)
-```
 --
 ```{r}
 #peguemos los datos
-serie.ts<-list(serie, tendencia) %>% reduce(bind_rows)
+plot.data <- list(mas_ricos, ni_tan_ricos) %>% reduce(bind_rows)
 ```
 
 ---
 class: middle
-```{r fig.retina=2, fig.align='center',fig.width=15,fig.height=3, warning=F}
+```{r fig.retina=2, fig.align='center',fig.width=7,fig.height=5, warning=F}
 #grafiquemos
-ggplot(data = serie.ts,aes(x=fechas, y= sst, color=categoria)) + 
-  geom_line() + xlab('') + ylab('SST (°C)') + 
-  scale_x_date(labels=date_format("%Y"), breaks=date_breaks(width="2 year"), 
-               limits=c(as.Date('1981-8-1'), as.Date('2019-4-30'))) + theme_bw()
+ggplot(data = plot.data,aes(x=comuna, fill=descripcion)) + 
+  geom_bar(position = 'dodge') + scale_fill_viridis_d() + xlab ('') + 
+  ylab('Número de manzanas censales') +  theme_bw()
 
 ```
 ---
