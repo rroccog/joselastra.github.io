@@ -23,12 +23,10 @@ background-size:40%
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 library(tidyverse)
-library(readxl)
 library(rgdal)
 library(raster)
 library(sf)
 library(leaflet)
-library(tmap)
 library(DT)
 
 ```
@@ -40,12 +38,11 @@ Librerías utilizadas en esta sesión
 
 ```{r eval=F}
 library(tidyverse)
-library(readxl)
 library(rgdal)
 library(raster)
 library(sf)
-library(leaflet)
-library(tmap)
+
+
 
 ```
 
@@ -174,7 +171,11 @@ area_manzana <- gomezCarrenoDensity$area_ha %>% as.numeric()
 poblacion <- gomezCarrenoDensity$PERSONA %>% as.numeric()
 gomezCarrenoDensity <- gomezCarrenoDensity %>% mutate(densidad = (poblacion/area_manzana))
 ```
-
+--
+Si queremos guardar la capa
+```{r, eval=F}
+st_write(gomezCarrenoDensity,'densidad_GC.shp')
+```
 ---
 Grafiquemos usando *ggplot2*
 ```{r fig.retina=2, fig.align='center', fig.height=7}
@@ -193,12 +194,17 @@ prep_pal <- colorNumeric("viridis", gomez_WGS$densidad)
 leaflet() %>% addProviderTiles("CartoDB.Positron") %>%
   #data layers
     addPolygons(data=gomez_WGS,weight = 1, color = "black", smoothFactor = 0.3,
-              fillOpacity = 0.5, fillColor = ~prep_pal(densidad),
+              fillOpacity = 0.8, fillColor = ~prep_pal(densidad),
               label = ~paste0('Densidad', ": ", round(densidad,digits = 2)),
               group = "Population Density") %>%
   addLegend(pal = prep_pal, values = gomez_WGS$densidad, opacity = 0.8,
             labels = densidad,title = 'Population density')
 ```
+
+---
+class: inverse, center, middle
+
+# RASTER
 
 ---
 
