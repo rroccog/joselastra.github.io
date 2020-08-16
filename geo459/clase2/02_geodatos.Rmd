@@ -177,6 +177,11 @@ gomezCarrenoDensity <- gomezCarrenoDensity %>% mutate(densidad = (poblacion/area
 
 ---
 Grafiquemos usando *ggplot2*
+```{r }
+g <- ggplot() + geom_sf(data = gomezCarrenoDensity, aes(fill=densidad)) + 
+  scale_fill_viridis_c() + theme_bw()
+```
+
 ---
 
 class: inverse,center, middle
