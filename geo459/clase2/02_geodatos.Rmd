@@ -26,6 +26,7 @@ library(tidyverse)
 library(rgdal)
 library(raster)
 library(sf)
+library(rasterVis)
 library(leaflet)
 library(DT)
 
@@ -38,12 +39,10 @@ Librerías utilizadas en esta sesión
 
 ```{r eval=F}
 library(tidyverse)
-library(rgdal)
+lib rary(rgdal)
 library(raster)
 library(sf)
-
-
-
+library(rasterVis)
 ```
 
 
@@ -205,6 +204,67 @@ leaflet() %>% addProviderTiles("CartoDB.Positron") %>%
 class: inverse, center, middle
 
 # RASTER
+---
+# Archivos raster
+
+- En general vamos a tener diferentes fuentes de información:
+ * Interpolaciones
+ * Imágenes satelitales
+ * Modelos (oceánicos, climáticos, hidrodinámicos, etc.)
+
+Para estos ejemplos utilizaremos información gruesa de [WorldClim](https://www.worldclim.org) 
+
+Para obtener la información haremos uso de la función *getData()* del paquete raster
+--
+```{r eval=F, message=F}
+#present climatologies
+temperatura <- getData('worldclim', var='tmean', res=10) 
+
+#writing raster data
+writeRaster(temperatura,filename = 'temperatura_WC.tif',format='GTiff',datatype='INT2S')
+
+
+```
+
+---
+#Leyendo nuestros datos raster
+
+--
+Como la información de temperatura es un *RasterStack* haremos uso de *stack()* de la librería *raster*
+```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.width=10,fig.height=5}
+
+temperatura <- stack('temperatura_WC.tif')
+#Ploting first month
+plot(temperatura[[1]])
+```
+
+---
+#Cortando y enmascarando rasters
+
+```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.width=10,fig.height=5}
+#leyendo capa vectorial
+chile <- read_sf('cl_continental_geo.shp')
+tempCHL <- temperatura %>% crop(chile) %>% mask(chile)
+plot(tempCHL[[1]])
+```
+
+---
+#Algunos cálculos sobre rasters
+```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.width=14,fig.height=6.5}
+#rescale values
+tempCHL <- tempCHL/10 
+names(tempCHL) <- month.abb #change names for layers
+rasterVis::levelplot(tempCHL) #plot 
+```
+---
+```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=6.5}
+t_mean <- tempCHL %>% mean() #media
+t_min <- tempCHL %>% min() #min
+t_max <- tempCHL %>% max() #max
+CHL_layers <- stack(t_min,t_mean,t_max) #bind data
+names(CHL_layers) <- c('min','mean','max')
+rasterVis::levelplot(CHL_layers)
+```
 
 ---
 
