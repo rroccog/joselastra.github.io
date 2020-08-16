@@ -151,7 +151,7 @@ st_crs(vinaUTM)[1]
 # Algunas cosas básicas
 ```{r fig.retina=2,fig.align='center'}
 #buffers
-vinaUTM %>% st_geometry() %>% st_centroid() %>% st_buffer(dist = 100) %>% plot()
+vinaUTM %>% st_geometry() %>% st_buffer(dist = 100) %>% plot()
 ```
 
 ---
@@ -162,7 +162,21 @@ vinaUTM %>% st_geometry() %>% st_centroid() %>% st_buffer(dist = 100) %>% plot()
 
 ```
 
+---
+#Creando una columna nueva
 
+```{r}
+#area square meters
+gomezCarrenoDensity <- gomezCarreno %>% mutate(area_ha = st_area(gomezCarreno)/10000)
+
+#density by block
+area_manzana <- gomezCarrenoDensity$area_ha %>% as.numeric()
+poblacion <- gomezCarrenoDensity$PERSONA %>% as.numeric()
+gomezCarrenoDensity <- gomezCarrenoDensity %>% mutate(densidad = (poblacion/area_manzana))
+```
+
+---
+Grafiquemos usando *ggplot2*
 ---
 
 class: inverse,center, middle

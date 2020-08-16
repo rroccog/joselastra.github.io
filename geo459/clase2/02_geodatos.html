@@ -73,7 +73,7 @@ vinaDelMar &lt;- readOGR('viña_del_mar.shp')
 
 ```
 ##    user  system elapsed 
-##    1.82    0.50    2.34
+##    1.96    0.53    2.52
 ```
 
 --
@@ -99,7 +99,7 @@ class(vinaDelMar)
 
 ```
 ##    user  system elapsed 
-##    0.09    0.03    0.13
+##    0.13    0.01    0.14
 ```
 
 --
@@ -172,7 +172,7 @@ vinaUTM &lt;- vinaDelMar %&gt;% st_transform(crs = '+proj=utm +zone=19 +south +d
 
 ```r
 #buffers
-vinaUTM %&gt;% st_geometry() %&gt;% st_centroid() %&gt;% st_buffer(dist = 100) %&gt;% plot()
+vinaUTM %&gt;% st_geometry() %&gt;% st_buffer(dist = 100) %&gt;% plot()
 ```
 
 &lt;img src="02_geodatos_files/figure-html/unnamed-chunk-12-1.png" width="504" style="display: block; margin: auto;" /&gt;
@@ -187,6 +187,19 @@ vinaUTM %&gt;% st_geometry() %&gt;% st_centroid() %&gt;% st_buffer(dist = 100) %
 
 &lt;img src="02_geodatos_files/figure-html/unnamed-chunk-13-1.png" width="504" style="display: block; margin: auto;" /&gt;
 
+---
+#Creando una columna nueva
+
+
+```r
+#area square meters
+gomezCarrenoDensity &lt;- gomezCarreno %&gt;% mutate(area_sqM = st_area(gomezCarreno))
+
+#density by block
+area_manzana &lt;- gomezCarrenoDensity$area_sqM %&gt;% as.numeric()
+poblacion &lt;- gomezCarrenoDensity$PERSONA %&gt;% as.numeric()
+gomezCarrenoDensity &lt;- gomezCarrenoDensity %&gt;% mutate(densidad = (poblacion/area_manzana))
+```
 
 ---
 
