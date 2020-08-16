@@ -1,5 +1,5 @@
 ---
-title: "Ayuda memoria [Geo-datos]"
+title: "Ayuda memoria [Datos]"
 subtitle: "Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>"
 author: "Mg. José A. Lastra"
 institute: "Laboratorio Geo-Información y Percepción Remota"
@@ -24,11 +24,7 @@ background-size:40%
 options(htmltools.dir.version = FALSE)
 library(tidyverse)
 library(readxl)
-library(rgdal)
-library(raster)
-library(sf)
-library(leaflet)
-library(tmap)
+library(scales)
 library(DT)
 
 ```
@@ -41,19 +37,15 @@ Librerías utilizadas en esta sesión
 ```{r eval=F}
 library(tidyverse)
 library(readxl)
-library(rgdal)
-library(raster)
-library(sf)
-library(leaflet)
-library(tmap)
+library(scales)
 
 ```
 
-
+Estas permiten la lectura, manipulación básica y avanzada de datos. Además de la construcción de gráficos y figuras.
 ---
 class: inverse, center, middle
 
-# LECTURA DE CAPAS VECTORIALES
+# LECTURA DE DATOS ALFANUMÉRICOS
 
 ---
 
