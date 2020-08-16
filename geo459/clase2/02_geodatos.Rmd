@@ -242,8 +242,9 @@ plot(temperatura[[1]])
 #Cortando y enmascarando rasters
 
 ```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.width=10,fig.height=5}
-#leyendo capa vectorial
+#reading shape for crop and mask
 chile <- read_sf('cl_continental_geo.shp')
+
 tempCHL <- temperatura %>% crop(chile) %>% mask(chile)
 plot(tempCHL[[1]])
 ```
@@ -253,7 +254,7 @@ plot(tempCHL[[1]])
 ```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.width=14,fig.height=6.5}
 #rescale values
 tempCHL <- tempCHL/10 
-names(tempCHL) <- month.abb #change names for layers
+names(tempCHL) <- month.abb #change layers's names
 rasterVis::levelplot(tempCHL) #plot 
 ```
 ---
