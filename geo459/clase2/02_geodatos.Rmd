@@ -39,7 +39,7 @@ Librerías utilizadas en esta sesión
 
 ```{r eval=F}
 library(tidyverse)
-lib rary(rgdal)
+library(rgdal)
 library(raster)
 library(sf)
 library(rasterVis)
@@ -115,7 +115,7 @@ plot(vinaDelMar['PERSONA'])
 plot(vinaDelMar['PERSONA'],breaks='quantile',key.pos = 1, axes=T)
 ```
 ---
-# Si solo quiero la geometría
+#Si solo quiero la geometría
 
 ```{r fig.retina=2, fig.align='center'}
 #we can use tidyverse code!
@@ -266,6 +266,21 @@ CHL_layers <- stack(t_min,t_mean,t_max) #bind data
 names(CHL_layers) <- c('min','mean','max')
 rasterVis::levelplot(CHL_layers)
 ```
+
+---
+#Usemos ggplot
+--
+```{r}
+#selecting mean temperature
+chl_mean <- CHL_layers[[2]]
+```
+--
+```{r}
+#converting raster to data frame with coordinates
+chl_meanDF <- chl_mean %>% as("SpatialPixelsDataFrame") %>% 
+  as.data.frame() %>% rename( t_mean = mean)
+```
+
 
 ---
 
