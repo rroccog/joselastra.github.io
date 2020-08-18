@@ -260,6 +260,10 @@ rasterVis::levelplot(tempCHL) #plot
 ---
 ```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=6.5}
 t_mean <- tempCHL %>% mean() #media
+```
+
+
+```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=6.5}
 t_min <- tempCHL %>% min() #min
 t_max <- tempCHL %>% max() #max
 CHL_layers <- stack(t_min,t_mean,t_max) #bind data
@@ -280,8 +284,81 @@ chl_mean <- CHL_layers[[2]]
 chl_meanDF <- chl_mean %>% as("SpatialPixelsDataFrame") %>% 
   as.data.frame() %>% rename( t_mean = mean)
 ```
+--
+```{r error=F,message=F,eval=F}
+ggplot() + geom_tile(data = chl_meanDF, aes(x = x, y = y,fill = t_mean)) + 
+  geom_sf(data = chile, alpha = 0,color='black') + theme_bw() + 
+  scale_fill_viridis_c() + xlab("") + ylab("")
+```
+---
+```{r echo=F, error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=8}
+ggplot() + geom_tile(data = chl_meanDF, aes(x = x, y = y,fill = t_mean)) + 
+  geom_sf(data = chile, alpha = 0,color='black') + theme_bw() + 
+  scale_fill_viridis_c() + xlab("") + ylab("")
+```
 
+---
+```{r out.width='100%', echo=F, warning=F,error=F,message=F}
+map <- leaflet() %>% addTiles()
+pal <- colorNumeric("viridis", values(chl_mean),
+  na.color = "transparent")
+map <- map %>% addRasterImage(chl_mean,method = 'ngb', colors = pal, opacity = 0.8,group = 'Temperature') %>%
+  addLegend(pal = pal, values = values(chl_mean),title = "Temperature (°C)",group = 'Legend')
 
+map %>% addLayersControl(overlayGroups = c("Temperature","Legend"),
+    options = layersControlOptions(collapsed = T))
+```
+
+---
+#Extrayendo inormación raster
+
+--
+- Extracción con puntos
+```{r warning=F,message=F,error=F}
+#creating sample points
+##objects sfc no work with extraction
+puntos <- extent(chl_mean) %>% 
+  as('SpatialPolygons') %>% 
+  spsample(500, type = 'random') %>%
+  st_as_sf()
+
+#extracting values
+sample_temp <- chl_mean %>% extract(puntos) 
+
+```
+--
+```{r}
+#merge data 
+puntos_temp <- puntos %>% mutate(temperatura = sample_temp) %>% 
+  na.omit() %>% st_set_crs(4326)
+```
+
+---
+#Grafiquemos los datos
+
+```{r echo=F, error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=8}
+#basic ggplot
+ggplot() + geom_sf(data = puntos_temp, aes(color=temperatura))+
+  geom_sf(data = chile, alpha = 0,color='black') + theme_bw() + 
+  scale_color_viridis_c() 
+```
+
+---
+#Extracción con polígonos
+
+```{r}
+#using chile shape for extraction
+chile_mean <- chl_mean %>% extract(chile,fun= mean,cellnumbers=T,na.rm=T)
+chile_mean
+
+```
+--
+```{r}
+##using whole raster
+chile_mean <- chl_mean %>% cellStats(stat=mean, na.rm=TRUE)
+chile_mean
+
+```
 ---
 
 class: inverse,center, middle
