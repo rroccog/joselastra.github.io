@@ -100,7 +100,7 @@ system.time(read_sf('viña_del_mar.shp'))
 - Desventajas: librería nueva aún no tiene completa compatibilidad con todas las funciones; [Pueden revisar](https://github.com/r-spatial/sf/wiki/migrating)
 
 ---
-#Visualizemos los datos
+#Visualicemos los datos
 
 --
 ```{r fig.retina=2, fig.align='center'}
@@ -260,12 +260,9 @@ rasterVis::levelplot(tempCHL) #plot
 ---
 ```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=6.5}
 t_mean <- tempCHL %>% mean() #media
-```
-
-
-```{r error=F,message=F,warning=F,fig.align='center',fig.retina=2,fig.height=6.5}
 t_min <- tempCHL %>% min() #min
 t_max <- tempCHL %>% max() #max
+
 CHL_layers <- stack(t_min,t_mean,t_max) #bind data
 names(CHL_layers) <- c('min','mean','max')
 rasterVis::levelplot(CHL_layers)
@@ -310,7 +307,7 @@ map %>% addLayersControl(overlayGroups = c("Temperature","Legend"),
 ```
 
 ---
-#Extrayendo inormación raster
+#Extrayendo información raster
 
 --
 - Extracción con puntos
@@ -348,7 +345,7 @@ ggplot() + geom_sf(data = puntos_temp, aes(color=temperatura))+
 
 ```{r}
 #using chile shape for extraction
-chile_mean <- chl_mean %>% extract(chile,fun= mean,cellnumbers=T,na.rm=T)
+chile_mean <- chl_mean %>% extract(chile,fun= mean,na.rm=T)
 chile_mean
 
 ```
