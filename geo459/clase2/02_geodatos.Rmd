@@ -45,7 +45,7 @@ library(sf)
 library(rasterVis)
 ```
 
-
+Datos para este laboratorio disponibles en la sección *Archivos* del aula virtual.
 ---
 class: inverse, center, middle
 
