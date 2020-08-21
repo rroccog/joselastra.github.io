@@ -8,10 +8,10 @@ dots <- st_as_sf(x = pasantes,
 
 iconos <- icons(
   iconUrl ="https://joselastra.github.io/labgrs/icono.png",
-  iconWidth = 25, iconHeight = 28,
-  iconAnchorX = 22, iconAnchorY = 94
+  iconWidth = 20, iconHeight = 22
 )
 url.dir <- pasantes$URL
+
 leaflet(dots) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>% 
   addMarkers(icon = iconos,popup = paste0("<b>Nombre: </b>", pasantes$NAME,"<br>",
                                           "<b>Universidad: </b>",pasantes$UNIVERSITY,"<br>",
@@ -23,3 +23,4 @@ leaflet(dots) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
                                          , textsize = "15px"
                                          , direction = "auto" ))
              )
+
