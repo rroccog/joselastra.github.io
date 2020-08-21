@@ -11,15 +11,15 @@ iconos <- icons(
   iconWidth = 25, iconHeight = 28,
   iconAnchorX = 22, iconAnchorY = 94
 )
-
+url.dir <- pasantes$URL
 leaflet(dots) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>% 
   addMarkers(icon = iconos,popup = paste0("<b>Nombre: </b>", pasantes$NAME,"<br>",
                                           "<b>Universidad: </b>",pasantes$UNIVERSITY,"<br>",
                                           "<b>Pais: </b>", pasantes$COUNTRY,"<br>",
-                                          "<a href='", pasantes$URL,"' target='_blank'>",
+                                          "<a href='",url.dir ,"' target='_blank'>",
                                           "Click Here to view university page</a>"),
-             popupOptions = style = list("font-weight" = "normal"
+             popupOptions = popupOptions(style = list("font-weight" = "normal"
                                          , padding = "3px 8px"
                                          , textsize = "15px"
-                                         , direction = "auto" )
+                                         , direction = "auto" ))
              )
