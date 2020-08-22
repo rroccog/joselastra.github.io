@@ -96,8 +96,11 @@ Entraremos más en detalle en estos conceptos a medida que avancemos con el curs
 .footnote[1. [Shiny MRI](https://haozhu233.shinyapps.io/shinyMRI-contest/?_ga=2.234467934.1955025335.1598126335-517575622.1584381273)]
 .footnote[2. [COVID-19 tracker](https://vac-lshtm.shinyapps.io/ncov_tracker/?_ga=2.202128721.1955025335.1598126335-517575622.1584381273)]
 
+---
+#Creando nuestra primera app
 
 --
+- Cree una carpeta de nombre *01_primera_app*
 
 
 ---
