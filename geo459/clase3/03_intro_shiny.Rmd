@@ -46,18 +46,65 @@ library(DT)
 ---
 class: inverse, center, middle
 
-# LECTURA DE DATOS ALFANUMÉRICOS
+# INTRODUCCIÓN
+
+---
+#¿Qué es shiny?
+
+--
+- [Shiny](https://shiny.rstudio.com/) es una estructura o marco para la creación de aplicaciones web de todo tipo usando R cómo código fuente. 
+
+--
+- Otrga flexibilidad paracrear desde desarrollos simples hasta otros muy complejos, sin tener que disponer de conocimientos de HTML, CSS o JavaScript.
+
+--
+- En términos simples: [shiny (1.5.0)](https://cran.r-project.org/web/packages/shiny/index.html) es un paquete de R
+
+.center[![:scale 60%](https://shiny.rstudio.com/tutorial/written-tutorial/lesson1/images/01_hello.png)]
+.center[.footnote[[Shiny, 2020](https://shiny.rstudio.com)]]
+
+---
+#¿Cuál es la clave?
+
+--
+- Disponemos de diferentes [funciones](https://shiny.rstudio.com/gallery/widget-gallery.html) de interfaz de usuario (ui, desde ahora) diseñadas para cosas comunes.
+- La lógica del proceso (server) se basa en programación reactiva, que permite identificar el procesamiento a partir de la interacción del usuario.
+
+--
+.center[![](https://shiny.rstudio.com/images/reactivity_diagrams/roles.png)]
+.center[.footnote[[Reactivity - An overview, 2017](https://shiny.rstudio.com/articles/reactivity-overview.html)]]
+
+                                   
+--
+Entraremos más en detalle en estos conceptos a medida que avancemos con el curso
 
 ---
 
 --
-En R podemos trabajar con diferentes datos (tablas, shapefiles, rasters, etc.)
+
+- Shiny puede ser usado en diferentes contextos y con distintos fines. 
 
 --
 
+- No está limitado y depende de la imaginación, planificación estructura y orden de las/los programadores
+
+--
+.center[
+![:scale 25%](ejemplo1.png)
+![:scale 42%](ejemplo2.png)
+]
+.footnote[1. [Shiny MRI](https://haozhu233.shinyapps.io/shinyMRI-contest/?_ga=2.234467934.1955025335.1598126335-517575622.1584381273)]
+.footnote[2. [COVID-19 tracker](https://vac-lshtm.shinyapps.io/ncov_tracker/?_ga=2.202128721.1955025335.1598126335-517575622.1584381273)]
+
+
+--
+
+
+---
+
 ```{r ,eval=T, echo=T, error=FALSE,warning=FALSE,message=FALSE}
 
-#read shapefile
+#read table
 CTD <- read_excel("Araucania2018_CTD_C1.xls")
 ```
 
