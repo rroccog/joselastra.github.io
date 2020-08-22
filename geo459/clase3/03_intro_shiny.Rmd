@@ -1,0 +1,81 @@
+---
+title: "Unidad 1: Introducción y <br>arquitectura de aplicaciones<br>"
+subtitle: "Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>"
+author: "Mg. José A. Lastra"
+institute: "Laboratorio Geo-Información y Percepción Remota"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output:
+  xaringan::moon_reader:
+    css: [fc]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      ratio: '16:9'
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+
+---
+background-image: url(logo_labgrs_color.png)
+background-position: center
+background-size:40%
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(shiny)
+library(tidyverse)
+library(readxl)
+library(DT)
+
+```
+
+
+---
+
+Librerías utilizadas en esta sesión
+
+```{r eval=F}
+library(shiny)
+library(tidyverse)
+library(readxl)
+library(DT)
+
+```
+
+
+---
+class: inverse, center, middle
+
+# LECTURA DE DATOS ALFANUMÉRICOS
+
+---
+
+--
+En R podemos trabajar con diferentes datos (tablas, shapefiles, rasters, etc.)
+
+--
+
+```{r ,eval=T, echo=T, error=FALSE,warning=FALSE,message=FALSE}
+
+#read shapefile
+CTD <- read_excel("Araucania2018_CTD_C1.xls")
+```
+
+```{r echo=F}
+CTD %>% 
+  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
+```
+
+
+---
+
+class: inverse,center, middle
+
+# ¿PREGUNTAS?
+
+---
+
+class: inverse,center, middle
+
+# PRÓXIMA SEMANA REPASO GEODATOS!
+
