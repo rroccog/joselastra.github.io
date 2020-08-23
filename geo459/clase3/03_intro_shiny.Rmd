@@ -153,7 +153,99 @@ server <- function(input, output, session) {
 #compiling app
 shinyApp(ui, server)
 ```
+---
 
+.center[
+![](app1.png)
+]
+
+--
+Agregemos algunos elementos base a nuestra *ui*
+
+--
+```{r eval=F}
+library(shiny)
+
+## User Interface
+ui <- fluidPage(sidebarPanel(
+  h1('Panel de opciones')
+                             ),
+                mainPanel(
+                  h1('Panel principal')
+                  
+                )
+)
+
+## Server
+server <- function(input, output, session) {
+  
+}
+#compiling app
+shinyApp(ui, server)
+
+```
+
+---
+
+.center[
+![:scale 40%](app2.png)
+]
+
+--
+Agreguemos un elemento visual a nuestra *ui* que genere una acción en el *server*
+
+```{r eval=F}
+library(shiny)
+library(readxl)
+library(tidyverse)
+
+## User Interface
+ui <- fluidPage(sidebarPanel(
+  h4('Panel de opciones')
+                             ),
+                mainPanel(
+                  h4('Panel principal'),
+                  plotOutput(outputId = 'perfil'),
+                  tableOutput(outputId = 'resumen')
+                )
+)
+
+```
+
+---
+#Server side
+
+--
+```{r eval=F}
+## Server
+server <- function(input, output, session) {
+  #reading data
+  tabla <- read_excel('data/Araucania2018_CTD_C1.xls')
+  
+  #rendering outputs
+  #Tabla
+  output$resumen <- renderTable({
+    df.resumen <- tabla %>% 
+      group_by(Estaciones) %>%
+      summarise(median = median(`Temperatura (°C)`), n = n())
+   df.resumen
+  })
+  
+  #plot
+  output$perfil <- renderPlot({
+    plot.data <- tabla %>% filter(Estaciones=='Nehuentué2')
+    ggplot(data = plot.data, aes(y=`Profundidad (m)`*-1,x = `Temperatura (°C)`)) + 
+      geom_line() + theme_bw()
+  })
+}
+#compiling app
+shinyApp(ui, server)
+```
+
+---
+.center[
+![:scale 60%](app3.png)
+]
 ---
 
 class: inverse,center, middle
@@ -164,5 +256,5 @@ class: inverse,center, middle
 
 class: inverse,center, middle
 
-# PRÓXIMA SEMANA REPASO GEODATOS!
+# PRÓXIMA SEMANA SEGUIMOS <br> MEJORANDO NUESTRA APLICACIÓN! <br> 
 
