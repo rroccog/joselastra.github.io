@@ -136,6 +136,7 @@ Una aplicación se va a componer de dos elementos básicos:
 --
 - Server
 
+--
 ```{r eval=F}
 library(shiny)
 
