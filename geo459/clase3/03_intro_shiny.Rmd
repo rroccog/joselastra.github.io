@@ -100,22 +100,58 @@ Entraremos más en detalle en estos conceptos a medida que avancemos con el curs
 #Creando nuestra primera app
 
 --
-- Cree una carpeta de nombre *01_primera_app*
 
+1 Cree una carpeta de nombre *01_primera_app*
 
----
+--
 
-```{r ,eval=T, echo=T, error=FALSE,warning=FALSE,message=FALSE}
+2 En RStudio, cree un nuevo script y guárdelo dentro de ese directorio con el nombre *app.R*
+
+--
+
+3 Incorpore el archivo *Araucania2018_CTD_C1.xls* disponible en la sección *Archivos* del aula
+
+--
+
+```{r ,eval=T, echo=F, error=FALSE,warning=FALSE,message=FALSE}
 
 #read table
 CTD <- read_excel("Araucania2018_CTD_C1.xls")
 ```
 
-```{r echo=F}
+```{r echo=F, eval=T}
 CTD %>% 
   datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
 ```
 
+---
+#Creando la estructura de nuestra aplicación
+
+--
+Una aplicación se va a componer de dos elementos básicos:
+
+--
+- Interfaz de usuario
+
+--
+- Server
+
+```{r eval=F}
+library(shiny)
+
+## User Interface
+ui <- fluidPage(
+  "¿qué tal la gente?"
+)
+
+## Server
+server <- function(input, output, session) {
+  
+}
+
+#compiling app
+shinyApp(ui, server)
+```
 
 ---
 
