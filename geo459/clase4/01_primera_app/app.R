@@ -22,7 +22,7 @@ ui <- fluidPage(sidebarPanel(
                 mainPanel(
                   h4('Panel principal'),
                   column(plotOutput(outputId = 'perfil',height = 500),width = 3, offset = 2),br(),
-                  fluidRow(tableOutput(outputId = 'resumen'))
+                  tableOutput(outputId = 'resumen')
                 )
 )
 
@@ -43,15 +43,14 @@ server <- function(input, output, session) {
   #plot
   output$perfil <- renderPlot({
     #making plot data
-    data.filter <- paste(input$select,input$millas,sep = '')
+    data.filter <- paste(input$select,input$millas,sep = '') #station's name
     plot.data <- tabla %>% filter(Estaciones==data.filter) %>% 
       mutate(prof = `Profundidad (m)`*-1) %>% as.data.frame()
-    plot.data$variable <- plot.data[, as.vector(input$campo[[1]])] 
+    plot.data$variable <- plot.data[, as.vector(input$campo[[1]])]  #generalized data frame
     #plot
-    par(mar = c(4, 4, 2, 2))
-  
+    par(mar = c(4, 4, 2, 2))#margin's control
     plot(plot.data[,'variable'], plot.data[,'prof'], type='l',xlab = input$campo, ylab='Prof. (m)',
-         main = paste(input$select, ':', input$campo[[1]]))
+         main = paste(input$select, ':', input$campo[[1]])) #plot
   })
 }
 #compiling app
