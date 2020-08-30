@@ -1,0 +1,293 @@
+---
+title: "Unidad 1: Creación de inputs y outputs - <br>operaciones en el server<br>"
+subtitle: "Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>"
+author: "Mg. José A. Lastra"
+institute: "Laboratorio Geo-Información y Percepción Remota"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output:
+  xaringan::moon_reader:
+    css: [fc]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      ratio: '16:9'
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+
+---
+background-image: url(logo_labgrs_color.png)
+background-position: center
+background-size:40%
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(shiny)
+library(tidyverse)
+library(readxl)
+library(DT)
+
+```
+
+
+---
+
+Librerías utilizadas en esta sesión
+
+```{r eval=F}
+library(shiny)
+library(tidyverse)
+library(readxl)
+library(DT)
+
+```
+
+
+---
+class: inverse, center, middle
+
+# INTRODUCCIÓN
+
+---
+#Modificando la interacción con la aplicación
+
+--
+- Seguiremos trabajando con la aplicación de la clase anterior. 
+
+--
+- Esta vez generaremos cambios a partir de la creación de inputs reactivos que alteren la estructura del código en el servidor
+
+
+
+.center[![:scale 45%](app3.png)]
+.center[.footnote[*Consejo:* Para realizar adecuadamente la incorporación de elementos reactivos es bueno tener una idea preliminar de lo que queremos lograr, y como queremos que el usuario se relacione con la aplicación.]]
+
+---
+#¿Cuál es la clave?
+
+--
+- Disponemos de diferentes [funciones](https://shiny.rstudio.com/gallery/widget-gallery.html) de interfaz de usuario (ui, desde ahora) diseñadas para cosas comunes.
+- La lógica del proceso (server) se basa en programación reactiva, que permite identificar el procesamiento a partir de la interacción del usuario.
+
+
+
+--
+.center[![](https://shiny.rstudio.com/images/reactivity_diagrams/roles.png)]
+.center[.footnote[[Reactivity - An overview, 2017](https://shiny.rstudio.com/articles/reactivity-overview.html)]]
+
+                                   
+--
+Entraremos más en detalle en estos conceptos a medida que avancemos con el curso
+
+---
+
+--
+
+- Shiny puede ser usado en diferentes contextos y con distintos fines. 
+
+--
+
+- No está limitado y depende de la imaginación, planificación estructura y orden de las/los programadores
+
+--
+.center[
+![:scale 25%](ejemplo1.png)
+![:scale 42%](ejemplo2.png)
+]
+.footnote[1. [Shiny MRI](https://haozhu233.shinyapps.io/shinyMRI-contest/?_ga=2.234467934.1955025335.1598126335-517575622.1584381273)]
+.footnote[2. [COVID-19 tracker](https://vac-lshtm.shinyapps.io/ncov_tracker/?_ga=2.202128721.1955025335.1598126335-517575622.1584381273)]
+
+---
+#Creando nuestra primera app
+
+--
+
+1 Cree una carpeta de nombre *01_primera_app*
+
+--
+
+2 En RStudio, cree un nuevo script y guárdelo dentro de ese directorio con el nombre *app.R*
+
+--
+
+3 Incorpore el archivo *Araucania2018_CTD_C1.xls* disponible en la sección *Archivos* del aula a una carpeta de nombre *data*
+
+--
+
+```{r ,eval=T, echo=F, error=FALSE,warning=FALSE,message=FALSE}
+
+#read table
+CTD <- read_excel("Araucania2018_CTD_C1.xls")
+```
+
+```{r echo=F, eval=T}
+CTD %>% 
+  datatable(class = 'cell-border stripe',rownames = FALSE,options = list(pageLength = 3))
+```
+
+---
+#Creando la estructura de nuestra aplicación
+
+--
+Una aplicación se va a componer de dos elementos básicos:
+
+--
+- Interfaz de usuario
+
+--
+```{r eval=F}
+## User Interface
+ui <- fluidPage(
+  "¿qué tal la gente?"
+)
+
+```
+--
+- Server
+
+--
+```{r eval=F}
+
+## Server
+server <- function(input, output, session) {
+  
+}
+
+#compiling app
+shinyApp(ui, server)
+```
+---
+
+.center[
+![](app1.png)
+]
+
+--
+Agregemos algunos elementos base a nuestra *ui*
+
+--
+```{r eval=F}
+library(shiny)
+
+## User Interface
+ui <- fluidPage(sidebarPanel(
+  h1('Panel de opciones')
+                             ),
+                mainPanel(
+                  h1('Panel principal')
+                  
+                )
+)
+```
+
+---
+
+.center[
+![:scale 40%](app2.png)
+]
+
+--
+Agreguemos elemento a nuestra *ui* que generen una acción de código en el *server*
+
+```{r eval=F}
+library(shiny)
+library(readxl)
+library(tidyverse)
+
+## User Interface
+ui <- fluidPage(sidebarPanel(
+  h4('Panel de opciones')
+                             ),
+                mainPanel(
+                  h4('Panel principal'),
+                  plotOutput(outputId = 'perfil'),
+                  tableOutput(outputId = 'resumen')
+                )
+)
+
+```
+
+---
+#Server side
+
+--
+```{r eval=F}
+  #reading data
+  tabla <- read_excel('data/Araucania2018_CTD_C1.xls')
+
+```
+
+--
+
+```{r eval=F}
+  #Tabla
+  output$resumen <- renderTable({
+    df.resumen <- tabla %>% 
+      group_by(Estaciones) %>%
+      summarise(median = median(`Temperatura (°C)`), n = n())
+   df.resumen
+  })
+  
+```
+
+--
+
+```{r eval=F}
+  #plot
+  output$perfil <- renderPlot({
+    plot.data <- tabla %>% filter(Estaciones=='Nehuentué2')
+    ggplot(data = plot.data, aes(y=`Profundidad (m)`*-1,x = `Temperatura (°C)`)) + 
+      geom_line() + theme_bw()
+  })
+```
+
+---
+```{r eval=F}
+## User Interface
+ui <- fluidPage(sidebarPanel(
+  h4('Panel de opciones')
+                             ),
+                mainPanel(
+                  h4('Panel principal'),
+                  plotOutput(outputId = 'perfil'),
+                  tableOutput(outputId = 'resumen')
+                )
+)
+## Server
+server <- function(input, output, session) {
+  #reading data
+  tabla <- read_excel('data/Araucania2018_CTD_C1.xls')
+  #rendering outputs
+  #Tabla
+  output$resumen <- renderTable({
+    df.resumen <- tabla %>% group_by(Estaciones) %>%
+            summarise(median = median(`Temperatura (°C)`), n = n())
+   df.resumen
+  })
+  #plot
+  output$perfil <- renderPlot({
+    plot.data <- tabla %>% filter(Estaciones=='Nehuentué2')
+    ggplot(data = plot.data, aes(y=`Profundidad (m)`*-1,x = `Temperatura (°C)`)) + 
+      geom_line() + theme_bw()
+  })
+}
+#compiling app
+shinyApp(ui, server)
+```
+
+---
+.center[
+![:scale 60%](app3.png)
+]
+---
+
+class: inverse,center, middle
+
+# ¿PREGUNTAS?
+
+---
+
+class: inverse,center, middle
+
+# PRÓXIMA SEMANA SEGUIMOS <br> MEJORANDO NUESTRA APLICACIÓN! <br> 
+
