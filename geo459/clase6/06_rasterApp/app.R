@@ -4,19 +4,21 @@ library(reshape2)
 library(sf)
 library(raster)
 library(rasterVis)
+library(shinybusy)
 
 ui <- fluidPage( ## armemos nuestra appa simple
+  add_loading_state(".shiny-plot-output", text = "Cargando gráfico...",
+    svgColor = "steelblue"),
   'Explorador de temperatura de Chile' %>% strong() %>% h4(),
-  uiOutput(outputId = 'regiones'), ## crearemos el input en el server
+  uiOutput(outputId = 'regiones'),## crearemos el input en el server
   plotOutput('rasPlot'),
   plotOutput('histo',width = '1000px') %>% column(width = 4,offset = 3)
-  
 )
 
 server <- function(input, output, session) {
   ##load data
   temp.data <- stack('data/chile_temp.tif')
-  chile <- st_read('data/Regional.shp')
+  chile <- read_sf('data/Regional.shp')
   names(temp.data) <- c('min','mean','max')
 
   #render uiOutput
@@ -25,19 +27,26 @@ server <- function(input, output, session) {
   output$regiones <- renderUI({
       selectInput(inputId = "region",label = "Seleccione una Región:",choices = regionInput[1:16],multiple = F )
     })
-  #render rasPlot
-  output$rasPlot <- renderPlot({
+  
+  #reactive data
+  data.select <- function (){
     req(input$region)
     shp.crop <- chile %>% filter(Region == input$region)
     r.plot <- temp.data %>% crop(shp.crop) %>% mask(shp.crop)
-    levelplot(r.plot/10)
+    r.plot
+  }
+ 
+  #render rasPlot
+  output$rasPlot <- renderPlot({
+    req(data.select())
+    levelplot(data.select()/10)
   })
+  
+  hide_spinner() # hide the spinner
   ##render histo
   output$histo <- renderPlot({
-    req(input$region)
-    shp.crop <- chile %>% filter(Region == input$region)
-    r.df <- temp.data %>% crop(shp.crop) %>% mask(shp.crop) %>% 
-      as('SpatialPixelsDataFrame') %>% as.data.frame()
+    req(data.select())
+    r.df <- data.select() %>% as('SpatialPixelsDataFrame') %>% as.data.frame()
     names(r.df) <- c('min','mean','max','x','y')
     r.dfPlot <- r.df %>% melt(id=c('x','y'))
     
@@ -45,7 +54,7 @@ server <- function(input, output, session) {
       geom_histogram(alpha=0.6, position = 'identity',bins = 20) + theme_bw()+ labs(fill="")+
       xlab('Temperatura') + ylab("Frecuencia")
   })
-    
+  
 }
 
 shinyApp(ui, server)

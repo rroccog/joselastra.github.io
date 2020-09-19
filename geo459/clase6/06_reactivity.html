@@ -149,6 +149,66 @@ background-position: center
 background-size:80%
 
 ---
+#Algunas consideraciones
+
+--
+- La aplicación funciona
+
+--
+- Hay dos render que realizan el mismo cálculo, eso resulta ineficiente para el desempeño del código.
+
+--
+- Siguiendo con este ejemplo crearemos una función reactiva que almacene los datos a utilizar en ambos render
+
+---
+# Creando una expresión reactiva
+
+--
+
+```r
+#reactive data
+  data.select &lt;- function (){
+    req(input$region)
+    shp.crop &lt;- chile %&gt;% filter(Region == input$region)
+    r.plot &lt;- temp.data %&gt;% crop(shp.crop) %&gt;% mask(shp.crop)
+    r.plot
+  }
+```
+
+--
+Modificando el plot del raster
+
+--
+
+```r
+ #render rasPlot
+  output$rasPlot &lt;- renderPlot({
+    req(data.select())
+    levelplot(data.select()/10)
+  })
+```
+
+---
+Modificando los histogramas
+
+--
+
+```r
+ ##render histo
+  output$histo &lt;- renderPlot({
+    req(data.select())
+    r.df &lt;- data.select() %&gt;% as('SpatialPixelsDataFrame') %&gt;% as.data.frame()
+    names(r.df) &lt;- c('min','mean','max','x','y')
+    r.dfPlot &lt;- r.df %&gt;% melt(id=c('x','y'))
+    
+    ggplot(data = r.dfPlot, aes(x=value/10, fill=variable)) +
+      geom_histogram(alpha=0.6, position = 'identity',bins = 20) + theme_bw()+ labs(fill="")+
+      xlab('Temperatura') + ylab("Frecuencia")
+  })
+```
+
+
+---
 class: inverse,center, middle
 
 # ¿PREGUNTAS?
@@ -157,7 +217,7 @@ class: inverse,center, middle
 
 class: inverse,center, middle
 
-# PRÓXIMA SEMANA SEGUIMOS &lt;br&gt; LES TOCA A USTEDES! &lt;br&gt;
+# PRÓXIMA SEMANA SEGUIMOS &lt;br&gt; CONDUCTORES REACTIVOS &lt;br&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
