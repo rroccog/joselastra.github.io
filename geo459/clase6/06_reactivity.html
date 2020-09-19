@@ -37,6 +37,7 @@ library(reshape2)
 library(sf)
 library(raster)
 library(rasterVis)
+library(shinybusy)
 ```
 
 
@@ -76,13 +77,15 @@ library(reshape2)
 library(sf)
 library(raster)
 library(rasterVis)
+library(shinybusy)
 
-ui &lt;- fluidPage( ## armemos nuestra app simple
+ui &lt;- fluidPage( ## armemos nuestra appa simple
+  add_loading_state(".shiny-plot-output", text = "Cargando gráfico...",
+    svgColor = "steelblue"),
   'Explorador de temperatura de Chile' %&gt;% strong() %&gt;% h4(),
-  uiOutput(outputId = 'regiones'), ## crearemos el input en el server
+  uiOutput(outputId = 'regiones'),## crearemos el input en el server
   plotOutput('rasPlot'),
   plotOutput('histo',width = '1000px') %&gt;% column(width = 4,offset = 3)
-  
 )
 ```
 
