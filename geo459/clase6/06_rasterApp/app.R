@@ -7,7 +7,7 @@ library(rasterVis)
 library(shinybusy)
 
 ui <- fluidPage( ## armemos nuestra appa simple
-  add_loading_state(".shiny-plot-output", text = "Cargando gráfico...",
+  add_loading_state(".shiny-plot-output", timeout = 5000,messageFontSize = 50 ,text = "Cargando gráfico...",
     svgColor = "steelblue"),
   'Explorador de temperatura de Chile' %>% strong() %>% h4(),
   uiOutput(outputId = 'regiones'),## crearemos el input en el server
@@ -42,7 +42,6 @@ server <- function(input, output, session) {
     levelplot(data.select()/10)
   })
   
-  hide_spinner() # hide the spinner
   ##render histo
   output$histo <- renderPlot({
     req(data.select())
