@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Unidad 2: Reactividad y funciones auxiliares -  Operaciones en el server</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Mg. José A. Lastra" />
+    <link href="libs/remark-css/fc.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Unidad 2: Reactividad y funciones auxiliares - <br>Operaciones en el server<br>
+## Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>
+### Mg. José A. Lastra
+### Laboratorio Geo-Información y Percepción Remota
+### 27/09/2020
+
+---
+
+background-image: url(logo_labgrs_color.png)
+background-position: center
+background-size:40%
+
+
+
+
+---
+
+Librerías utilizadas en esta sesión
+
+
+```r
+library(shiny)
+library(tidyverse)
+library(shinybusy)
+```
+
+
+---
+class: inverse, center, middle
+
+# INTRODUCCIÓN
+
+---
+#Reactividad: 
+
+--
+- Dentro del server podemos utilizar conductores reactivos creados como funciones. [Clase 6](https://joselastra.github.io/geo459/clase6/06_reactivity.html)
+
+--
+- En esta sesión, veremos los conductores reactivos comunes empleados en shiny y qué es lo que nos permiten realizar
+
+--
+## ¿Y por qué no utilizamos solo funciones creadas?
+
+--
+- Los conductores nos permiten crear elementos en caché y evitar cálculos innecesarios dentro de la aplicación.
+
+--
+- La idea general es ver su utilidad en un contexto simple, para permitir luego su aplicación en un contexto más operativo.
+
+
+---
+# reactive() y eventReactive()
+
+--
+- Crearemos primero un script demo usando datos random
+
+--
+
+UI
+
+```r
+library(shiny)
+library(tidyverse)
+
+ui &lt;- fluidPage(
+  selectInput('campo1',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  selectInput('campo2',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  actionButton('plot','Crear plot'),hr(),
+  textOutput('corr'),
+  plotOutput('plot')
+)
+```
+
+---
+Server
+
+--
+
+```r
+server &lt;- function(input, output, session) {
+ #load  data
+  data.CTD &lt;- read.csv('CTD_data.csv',sep = ';')
+  
+  #reactive expression
+  data1 &lt;- reactive(
+    cor(data.CTD[,input$campo1],data.CTD[,input$campo2])
+  )
+  # salida corr
+  output$corr &lt;- renderText({ data1() })
+  #event reactive expression
+  plot1 &lt;- eventReactive(input$plot,{
+    ggplot(data = data.CTD, aes_string(x = input$campo1, y = input$campo2)) + geom_point() + 
+      geom_smooth(method = 'lm') + theme_bw()
+  }) 
+  #salida plot
+  output$plot &lt;- renderPlot({ plot1() })
+
+}
+```
+
+---
+background-image: url(app1.png)
+background-position: center
+background-size:70%
+
+---
+# Consideraciones
+
+- Ambas expresiones reactivas permiten almacenar valores para poder ser empleados en otra expresión.
+
+--
+- *eventReactive()* a diferencia de *reactive()*, va a depender de expresiones reactivas que se especifiquen y no de todas las expresiones reactivas que estén en la sección de ejecución. 
+
+--
+- En nuestro caso, el *actionButton* es quien ordena que se ejecute el código y llama al resto de los elementos reactivos de la UI.
+
+--
+- *reactive()* es bastante útil en ciertos contextos simples, generando dependencias constantes que se ejecutan al ser llamadas.
+
+-- 
+- *eventReactive()* da mayor control sobre las expresiones y sus dependencias, aunque uno nunca puede controlar todo.
+
+---
+#observe() y observeEvent()
+
+--
+- A diferencia de la familia *reactive*, los *observers* no almacenan valores ni cálculos para ser usados en otras expresiones (no almacenan información en caché)
+
+--
+- Son más parecidos a una salida, y permiten evidenciar de manera clara los cambios en las entradas reactivas.
+
+--
+- Los *observers* son empleados para mandar "efectos" a la web visualizable. *Serán escenciales para nuestras aplicaciones de webmapping*
+
+---
+#Ejemplo
+
+--
+Al código de nuestro server le agregaremos lo siguiente:
+
+--
+
+```r
+ # observer
+  observe({
+    input$plot
+    showModal(modalDialog(
+      title = "Grafico listo",
+      "You plot the data!"
+    ))
+  })
+```
+
+--
+.center[![](app2.png)]
+
+---
+#Importante
+
+--
+- No acepta condiciones *NULL*, por tanto se ejecuta aunque no hagamos nada (*side-effects*)
+
+--
+.center[![:scale 60%](app3.png)]
+
+--
+- Y obviamente, se ejecutará cuando realicemos la acción
+
+--
+- En ese contexto *observeEvent()* se vuelve más apropiado.
+
+---
+Modfiquemos lo anterior con la siguiente expresión:
+
+--
+
+```r
+ # observer
+  observeEvent(input$plot,{
+    showModal(modalDialog(
+      title = "Grafico listo",
+      "You plot the data!"
+    ))
+  })
+```
+
+--
+- Con esto podemos controlar no solo 1, sino que varias expresiones y entradas reactivas en un bloque de código.
+
+---
+#rectiveValues(): usando expresiones con mayor sentido
+
+--
+- *reactiveValues()* nos permite almacenar valores para ser usados posteriormente en expresiones reactivas.
+
+--
+- Puede ser util en general para manipulación de datos.
+
+--
+- Para este ejemplo modificaremos un poco nuestra UI y nuestro server
+
+--
+
+```r
+ui &lt;- fluidPage(
+  selectInput('campo1',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  selectInput('campo2',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  actionButton('submit','Mostrar Correlación'),hr(),
+  textOutput('corr'),
+  plotOutput('plot')
+)
+```
+---
+En nuestro server estos son los cambios:
+
+--
+
+```r
+server &lt;- function(input, output, session) {
+ #load  data
+  data.CTD &lt;- read.csv('CTD_data.csv',sep = ';')
+  # reactiveValues
+  text_corr &lt;- reactiveValues(text = "Seleccione dos variables diferentes", 
+                              correlacion = " y oprima 'Mostrar Correlación'" )
+  #reactive expression
+  data1 &lt;- reactive( cor(data.CTD[,input$campo1],data.CTD[,input$campo2]))
+  #observe actualiza el valor dentro de reactive values
+  observeEvent(input$submit,
+               { text_corr$text &lt;- 'Valor de correlación'
+                 text_corr$correlacion &lt;- data1()
+               })
+  # salida corr
+  output$corr &lt;- renderText({ c(text_corr$text,':',text_corr$correlacion) })
+  #event reactive expression
+  plot1 &lt;- reactive({
+    ggplot(data = data.CTD, aes_string(x = input$campo1, y = input$campo2)) + geom_point() + 
+      geom_smooth(method = 'lm') + theme_bw()
+  }) 
+  #salida plot
+  output$plot &lt;- renderPlot({ plot1() })
+}
+```
+
+---
+class: center, middle
+.pull-left[![:scale 45%](app4.png)]
+.Pull-right[![:scale 45%](app5.png)]
+---
+class: inverse,center, middle
+
+# ¿PREGUNTAS?
+
+---
+
+class: inverse,center, middle
+
+# PRÓXIMA SEMANA: &lt;br&gt; CREANDO FUNCIONES Y USÁNDOLAS EN NUESTRA APP &lt;br&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"ratio": "16:9",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 ---
-title: "Unidad 2: Reactividad y funciones reactivas - <br>Operaciones en el server<br>"
+title: "Unidad 2: Reactividad y funciones auxiliares - <br>Operaciones en el server<br>"
 subtitle: "Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>"
 author: "Mg. José A. Lastra"
 institute: "Laboratorio Geo-Información y Percepción Remota"
@@ -24,10 +24,6 @@ background-size:40%
 options(htmltools.dir.version = FALSE)
 library(shiny)
 library(tidyverse)
-library(reshape2)
-library(sf)
-library(raster)
-library(rasterVis)
 library(shinybusy)
 ```
 
@@ -39,10 +35,6 @@ Librerías utilizadas en esta sesión
 ```{r eval=F}
 library(shiny)
 library(tidyverse)
-library(reshape2)
-library(sf)
-library(raster)
-library(rasterVis)
 library(shinybusy)
 
 ```
@@ -54,162 +46,220 @@ class: inverse, center, middle
 # INTRODUCCIÓN
 
 ---
-#Aplicación simple con raster
+#Reactividad: 
 
 --
-- Crearemos una app que grafique 3 capas de acuerdo a la región que el usuario seleccione. 
+- Dentro del server podemos utilizar conductores reactivos creados como funciones. [Clase 6](https://joselastra.github.io/geo459/clase6/06_reactivity.html)
 
 --
-- Nos deberá mostrar un histograma de los valores para la región.
+- En esta sesión, veremos los conductores reactivos comunes empleados en shiny y qué es lo que nos permiten realizar
 
 --
-- Primero haremos la app en un modo *imperativa* y luego mejoraremos el código utilizando programación *reactiva*
+## ¿Y por qué no utilizamos solo funciones creadas?
+
+--
+- Los conductores nos permiten crear elementos en caché y evitar cálculos innecesarios dentro de la aplicación.
+
+--
+- La idea general es ver su utilidad en un contexto simple, para permitir luego su aplicación en un contexto más operativo.
 
 
 ---
-#Construyento la app
+# reactive() y eventReactive()
 
 --
-- Recuerde crrear un directorio de nombre *06_rasterApp* y dentro una carpeta de nombre *data*.
+- Crearemos primero un script demo usando datos random
 
 --
-- En la carpeta *data* deberá tener los archivos: (i) *chile_temp.tif* y (ii) *Regional.shp*
 
---
-```{r eval=FALSE}
+UI
+```{r eval=F}
 library(shiny)
 library(tidyverse)
-library(reshape2)
-library(sf)
-library(raster)
-library(rasterVis)
-library(shinybusy)
 
-ui <- fluidPage( ## armemos nuestra appa simple
-  add_loading_state(".shiny-plot-output", text = "Cargando gráfico...",
-    svgColor = "steelblue"),
-  'Explorador de temperatura de Chile' %>% strong() %>% h4(),
-  uiOutput(outputId = 'regiones'),## crearemos el input en el server
-  plotOutput('rasPlot'),
-  plotOutput('histo',width = '1000px') %>% column(width = 4,offset = 3)
+ui <- fluidPage(
+  selectInput('campo1',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  selectInput('campo2',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  actionButton('plot','Crear plot'),hr(),
+  textOutput('corr'),
+  plotOutput('plot')
 )
 ```
 
 ---
-#Server
+Server
 
 --
-Leyendo datos de entrada
 ```{r eval=F}
-##load data
-  temp.data <- stack('data/chile_temp.tif')
-  chile <- st_read('data/Regional.shp')
-  names(temp.data) <- c('min','mean','max')
-```
+server <- function(input, output, session) {
+ #load  data
+  data.CTD <- read.csv('CTD_data.csv',sep = ';')
+  
+  #reactive expression
+  data1 <- reactive(
+    cor(data.CTD[,input$campo1],data.CTD[,input$campo2])
+  )
+  # salida corr
+  output$corr <- renderText({ data1() })
+  #event reactive expression
+  plot1 <- eventReactive(input$plot,{
+    ggplot(data = data.CTD, aes_string(x = input$campo1, y = input$campo2)) + geom_point() + 
+      geom_smooth(method = 'lm') + theme_bw()
+  }) 
+  #salida plot
+  output$plot <- renderPlot({ plot1() })
 
---
-Renderizando la selección de regiones
-```{r eval=F}
-regionInput <- chile$Region %>% unique()
-output$regiones <- renderUI({
-      selectInput(inputId = "region",label = "Seleccione una Región:",choices = regionInput[1:16],multiple = F )
-    })
-```
-
----
-
---
-Renderizando el plot raster
-```{r eval=F}
- #render rasPlot
-  output$rasPlot <- renderPlot({
-    req(input$region)
-    shp.crop <- chile %>% filter(Region == input$region)
-    r.plot <- temp.data %>% crop(shp.crop) %>% mask(shp.crop)
-    levelplot(r.plot/10)
-  })
-```
-
---
-Renderizando histogramas
-```{r eval=F}
-  ##render histo
-  output$histo <- renderPlot({
-    req(input$region)
-    shp.crop <- chile %>% filter(Region == input$region)
-    r.df <- temp.data %>% crop(shp.crop) %>% mask(shp.crop) %>% 
-      as('SpatialPixelsDataFrame') %>% as.data.frame()
-    names(r.df) <- c('min','mean','max','x','y')
-    r.dfPlot <- r.df %>% melt(id=c('x','y'))
-    
-    ggplot(data = r.dfPlot, aes(x=value/10, fill=variable)) +
-      geom_histogram(alpha=0.6, position = 'identity',bins = 20) + theme_bw()+ labs(fill="")+
-      xlab('Temperatura') + ylab("Frecuencia")
-  })
+}
 ```
 
 ---
 background-image: url(app1.png)
 background-position: center
-background-size:80%
+background-size:70%
 
 ---
-#Algunas consideraciones
+# Consideraciones
+
+- Ambas expresiones reactivas permiten almacenar valores para poder ser empleados en otra expresión.
 
 --
-- La aplicación funciona
+- *eventReactive()* a diferencia de *reactive()*, va a depender de expresiones reactivas que se especifiquen y no de todas las expresiones reactivas que estén en la sección de ejecución. 
 
 --
-- Hay dos render que realizan el mismo cálculo, eso resulta ineficiente para el desempeño del código.
+- En nuestro caso, el *actionButton* es quien ordena que se ejecute el código y llama al resto de los elementos reactivos de la UI.
 
 --
-- Siguiendo con este ejemplo crearemos una función reactiva que almacene los datos a utilizar en ambos render
+- *reactive()* es bastante útil en ciertos contextos simples, generando dependencias constantes que se ejecutan al ser llamadas.
+
+-- 
+- *eventReactive()* da mayor control sobre las expresiones y sus dependencias, aunque uno nunca puede controlar todo.
 
 ---
-# Creando una expresión reactiva
+#observe() y observeEvent()
+
+--
+- A diferencia de la familia *reactive*, los *observers* no almacenan valores ni cálculos para ser usados en otras expresiones (no almacenan información en caché)
+
+--
+- Son más parecidos a una salida, y permiten evidenciar de manera clara los cambios en las entradas reactivas.
+
+--
+- Los *observers* son empleados para mandar "efectos" a la web visualizable. *Serán escenciales para nuestras aplicaciones de webmapping*
+
+---
+#Ejemplo
+
+--
+Al código de nuestro server le agregaremos lo siguiente:
 
 --
 ```{r eval=F}
-#reactive data
-  data.select <- function (){
-    req(input$region)
-    shp.crop <- chile %>% filter(Region == input$region)
-    r.plot <- temp.data %>% crop(shp.crop) %>% mask(shp.crop)
-    r.plot
-  }
+ # observer
+  observe({
+    input$plot
+    showModal(modalDialog(
+      title = "Grafico listo",
+      "You plot the data!"
+    ))
+  })
+
 ```
 
 --
-Modificando el plot del raster
+.center[![](app2.png)]
+
+---
+#Importante
+
+--
+- No acepta condiciones *NULL*, por tanto se ejecuta aunque no hagamos nada (*side-effects*)
+
+--
+.center[![:scale 60%](app3.png)]
+
+--
+- Y obviamente, se ejecutará cuando realicemos la acción
+
+--
+- En ese contexto *observeEvent()* se vuelve más apropiado.
+
+---
+Modfiquemos lo anterior con la siguiente expresión:
 
 --
 ```{r eval=F}
- #render rasPlot
-  output$rasPlot <- renderPlot({
-    req(data.select())
-    levelplot(data.select()/10)
+ # observer
+  observeEvent(input$plot,{
+    showModal(modalDialog(
+      title = "Grafico listo",
+      "You plot the data!"
+    ))
   })
 ```
 
+--
+- Con esto podemos controlar no solo 1, sino que varias expresiones y entradas reactivas en un bloque de código.
+
 ---
-Modificando los histogramas
+#rectiveValues(): usando expresiones con mayor sentido
+
+--
+- *reactiveValues()* nos permite almacenar valores para ser usados posteriormente en expresiones reactivas.
+
+--
+- Puede ser util en general para manipulación de datos.
+
+--
+- Para este ejemplo modificaremos un poco nuestra UI y nuestro server
 
 --
 ```{r eval=F}
- ##render histo
-  output$histo <- renderPlot({
-    req(data.select())
-    r.df <- data.select() %>% as('SpatialPixelsDataFrame') %>% as.data.frame()
-    names(r.df) <- c('min','mean','max','x','y')
-    r.dfPlot <- r.df %>% melt(id=c('x','y'))
-    
-    ggplot(data = r.dfPlot, aes(x=value/10, fill=variable)) +
-      geom_histogram(alpha=0.6, position = 'identity',bins = 20) + theme_bw()+ labs(fill="")+
-      xlab('Temperatura') + ylab("Frecuencia")
-  })
+ui <- fluidPage(
+  selectInput('campo1',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  selectInput('campo2',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+                                                                     "Sigma" ,"Oxigeno_disuelto")),
+  actionButton('submit','Mostrar Correlación'),hr(),
+  textOutput('corr'),
+  plotOutput('plot')
+)
+```
+---
+En nuestro server estos son los cambios:
+
+--
+```{r eval=F}
+server <- function(input, output, session) {
+ #load  data
+  data.CTD <- read.csv('CTD_data.csv',sep = ';')
+  # reactiveValues
+  text_corr <- reactiveValues(text = "Seleccione dos variables diferentes", 
+                              correlacion = " y oprima 'Mostrar Correlación'" )
+  #reactive expression
+  data1 <- reactive( cor(data.CTD[,input$campo1],data.CTD[,input$campo2]))
+  #observe actualiza el valor dentro de reactive values
+  observeEvent(input$submit,
+               { text_corr$text <- 'Valor de correlación'
+                 text_corr$correlacion <- data1()
+               })
+  # salida corr
+  output$corr <- renderText({ c(text_corr$text,':',text_corr$correlacion) })
+  #event reactive expression
+  plot1 <- reactive({
+    ggplot(data = data.CTD, aes_string(x = input$campo1, y = input$campo2)) + geom_point() + 
+      geom_smooth(method = 'lm') + theme_bw()
+  }) 
+  #salida plot
+  output$plot <- renderPlot({ plot1() })
+}
 ```
 
-
+---
+class: center, middle
+.pull-left[![:scale 45%](app4.png)]
+.Pull-right[![:scale 45%](app5.png)]
 ---
 class: inverse,center, middle
 
@@ -219,5 +269,5 @@ class: inverse,center, middle
 
 class: inverse,center, middle
 
-# PRÓXIMA SEMANA SEGUIMOS <br> CONDUCTORES REACTIVOS <br> 
+# PRÓXIMA SEMANA: <br> CREANDO FUNCIONES Y USÁNDOLAS EN NUESTRA APP <br> 
 
