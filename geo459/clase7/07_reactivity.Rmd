@@ -1,5 +1,5 @@
 ---
-title: "Unidad 2: Reactividad y funciones auxiliares - <br>Operaciones en el server<br>"
+title: "Unidad 2: Reactividad y funciones reactivas II - <br>Operaciones en el server<br>"
 subtitle: "Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>"
 author: "Mg. José A. Lastra"
 institute: "Laboratorio Geo-Información y Percepción Remota"
@@ -24,7 +24,6 @@ background-size:40%
 options(htmltools.dir.version = FALSE)
 library(shiny)
 library(tidyverse)
-library(shinybusy)
 ```
 
 
@@ -35,8 +34,6 @@ Librerías utilizadas en esta sesión
 ```{r eval=F}
 library(shiny)
 library(tidyverse)
-library(shinybusy)
-
 ```
 
 
