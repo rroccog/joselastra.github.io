@@ -130,7 +130,7 @@ background-size:70%
 --
 - *reactive()* es bastante útil en ciertos contextos simples, generando dependencias constantes que se ejecutan al ser llamadas.
 
--- 
+--
 - *eventReactive()* da mayor control sobre las expresiones y sus dependencias, aunque uno nunca puede controlar todo.
 
 ---
