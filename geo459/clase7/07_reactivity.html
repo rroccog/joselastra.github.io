@@ -77,7 +77,7 @@ library(tidyverse)
 ui &lt;- fluidPage(
   selectInput('campo1',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
                                                                      "Sigma" ,"Oxigeno_disuelto")),
-  selectInput('campo2',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+  selectInput('campo2',label = 'Seleccione segundo campo',choices = c("Temperatura","Salinidad",
                                                                      "Sigma" ,"Oxigeno_disuelto")),
   actionButton('plot','Crear plot'),hr(),
   textOutput('corr'),
@@ -219,7 +219,7 @@ Modfiquemos lo anterior con la siguiente expresión:
 ui &lt;- fluidPage(
   selectInput('campo1',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
                                                                      "Sigma" ,"Oxigeno_disuelto")),
-  selectInput('campo2',label = 'Seleccione primer campo',choices = c("Temperatura","Salinidad",
+  selectInput('campo2',label = 'Seleccione segunda campo',choices = c("Temperatura","Salinidad",
                                                                      "Sigma" ,"Oxigeno_disuelto")),
   actionButton('submit','Mostrar Correlación'),hr(),
   textOutput('corr'),
