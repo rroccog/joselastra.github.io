@@ -63,7 +63,7 @@ class: inverse, center, middle
 #Creando una aplicación simple
 
 --
-- Usando información de faenas mineras de Chile de nombre *viña_del_mar.shp* obtenida desde [INE](https://geoine-ine-chile.opendata.arcgis.com/), crearemos una app donde usaremos:
+- Usando información de los micro datos del Censo 2017 para la comuna de Viña del mar (*viña_del_mar.gpkg*) obtenida desde [INE](https://geoine-ine-chile.opendata.arcgis.com/), crearemos una app donde usaremos:
 
 --
 - Código *HTML* y *CSS* empleando la función *tag()*
@@ -72,7 +72,7 @@ class: inverse, center, middle
 - Funciones y conductores reactivos (reactives y observers)
 
 --
-- Crearemos una función auxiliar y la emplearemos dentro del código.
+- Crearemos una función auxiliar  con funciones condicionales y la emplearemos dentro del código.
 
 .center[![:scale 30%](https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/r_first_then.png)
 
@@ -108,7 +108,7 @@ ui &lt;- bootstrapPage(
 ```r
 server &lt;- function(input, output, session) {
   #Load data
-  shp &lt;- read_sf('data/viña_del_mar.shp') %&gt;% st_transform(4326)
+  shp &lt;- read_sf('data/viña_del_mar.gpkg') %&gt;% st_transform(4326)
   ## rendering base map
   output$map &lt;- renderLeaflet({
     leaflet() %&gt;% addProviderTiles(providers$CartoDB.DarkMatter)
@@ -131,8 +131,11 @@ class: center
 
 --
 - Importante conocer esto sobre los paneles y su posición en la página [Más info.](https://leafletjs.com/reference-1.7.1.html#map-pane)
+
 --
--
+- Usaremos un panel que irá sobre nuestro mapa e iremos incorporando opciones en el.
+
+--
 
 ```r
 absolutePanel(id="controls",
@@ -140,13 +143,208 @@ absolutePanel(id="controls",
                 bottom = "auto",
                 width = 400, height ="auto",
                 class = "panel panel-default",
-                selectInput(inputId = 'resumen',label = 'Seleccione nivel para resumen',
-                            choices = c(1,2,3)),
-                actionButton('plot',label = 'Mostrar información seleccionada')
-  )
+                selectInput(inputId = 'campo',label = 'Seleccione variable a visualizar',
+                            choices = list('Total personas' = 'PERSONAS',
+                                           'Densidad (per/ha)'='DENSIDAD',
+                                           'Viviendas'='TOTAL_VIVI')),
+                actionButton('plot',label = 'Presione para ver el histograma'),
+                plotOutput('grafico')
+                )
 ```
 
+---
+# SERVER
 
+--
+Primero añadiremos la capa de Viña del Mar sin considerar los inputs y luego usaremos las opciones para modificarla
+
+--
+
+```r
+ ## rendering base map
+  output$map &lt;- renderLeaflet({
+    leaflet() %&gt;% addProviderTiles(providers$CartoDB.DarkMatter) %&gt;% 
+      addPolygons(data = shp,group = 'Manzanas') %&gt;%
+      addLayersControl(overlayGroups = 'Manzanas',position = 'topleft')
+  })
+```
+
+---
+class: middle, center
+![:scale 70%](app2.png)
+
+---
+# Importante
+
+--
+- Para modificar la información del mapa sin que se recarge completo cada vez, usaremos la función **leafletProxy()**
+
+--
+- Además usaremos nuestros primeros condicionales para operar sobre el proxy
+
+--
+- Veremos la utilidad de los observers aplicados a un mapa web
+
+--
+
+
+```r
+  ## rendering base map
+  output$map &lt;- renderLeaflet({
+    leaflet() %&gt;% addProviderTiles(providers$CartoDB.DarkMatter) %&gt;% 
+      fitBounds(lng1 =-71.586 ,lat1 =-33.105 ,lng2 =-71.45 ,lat2 = -32.944) %&gt;%
+      addLayersControl(overlayGroups = 'Manzanas',position = 'topleft')
+  })
+```
+
+---
+# Creando nuestro mapa dinámico
+
+--
+- Usaremos *observe({})* como conductor reactivo de los cambios en la UI
+
+--
+- Primero crearemos los elementos dinámicos para mostrar con colores la información
+
+--
+- Y crearemos un objeto de nombre *proxyMap*
+
+--
+
+```r
+observe({
+    #preparando paletas
+    dominio &lt;- shp[,input$campo[[1]]] %&gt;% unlist() %&gt;% as.numeric()
+    pal &lt;- colorBin(palette = "viridis",domain = dominio)
+    
+    proxyMap &lt;- leafletProxy('map') %&gt;% clearShapes()
+        })
+```
+
+--
+- El siguiente paso es definir los condicionales dentro del observer
+
+--
+- Para esto usaremos la función *if()*
+
+---
+#Revisemos
+
+--
+- En ese caso, evaluaremos si el campo seleccionado por el usuario es igual a el campo que queremos mapear siguiendo esta estructura `if(input$campo[[1]] == 'PERSONAS'){}`
+
+--
+- Dentro de las *{}* debemos poner el código que se ejecutará si la condición establecida se cumple
+
+--
+
+```r
+  if(input$campo[[1]] == 'PERSONAS'){
+    proxyMap &lt;- proxyMap %&gt;% 
+      addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(PERSONAS), fillOpacity = 0.7,
+                  stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+  }
+```
+
+--
+- Este ejemplo aplica para la primera condición y aplica la paleta de colores (`fillColor = ~pal(PERSONAS)`) de acuderdo al campo seleccionado.
+
+--
+- Repitamos esto para las otras condiciones
+
+---
+
+```r
+ observe({
+    #preparando paletas
+    dominio &lt;- shp[,input$campo[[1]]] %&gt;% unlist() %&gt;% as.numeric()
+    pal &lt;- colorBin(palette = "viridis",domain = dominio)
+  #crando objeto proxy  
+  proxyMap &lt;- leafletProxy('map') %&gt;% clearShapes()
+  #condicionales
+  if(input$campo[[1]] == 'PERSONAS'){
+    proxyMap &lt;- proxyMap %&gt;% 
+      addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(PERSONAS), fillOpacity = 0.7,
+                  stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+  }
+  if(input$campo[[1]] == 'TOTAL_VIVI'){
+    proxyMap &lt;- proxyMap %&gt;% 
+      addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(TOTAL_VIVI), fillOpacity = 0.7,
+                  stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+  }
+  if(input$campo[[1]] == 'DENSIDAD'){
+    proxyMap &lt;- proxyMap %&gt;% 
+      addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(DENSIDAD), fillOpacity = 0.7,
+                  stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+  }
+  #print map
+  proxyMap
+  })
+```
+
+---
+#Creemos una primera función 
+
+--
+- Las funciones auxiliares nos permiten modularizar código para ahorrar la carga sobre el script principal
+
+--
+- Nos permiten reutilizar código facilmente y optimizar el desarrollo y el debugging.
+
+--
+- El script de la función se verá de la siguiente manera, considerando la opción para plotear:
+
+--
+
+```r
+dataPlot &lt;- function(){
+  
+}
+```
+
+---
+#Armando la función
+
+--
+- Para este ejemplo realizaremos una función gráfica que requerirá dos argumentos: *(1) campo* y *(2) shp*
+
+--
+- Dentro simplemente armaremos un código genérico para un histograma.
+
+--
+
+```r
+dataPlot &lt;- function(datos , campo){
+
+  ggplot(data = datos, aes_string(x = campo)) + geom_histogram() + theme_bw() +
+    xlab(campo) + ylab('Frecuencia')
+}
+```
+
+--
+- Este script lo guardaremos en el mismo directorio de la aplicación, con el nombre *dataPlot.R*
+
+---
+# Usando la función en nuestra app
+
+--
+- Para cargar la función usaremos `source('dataPlot.R')`, idealmente antes de la UI.
+
+--
+- Luego renderizaremos nuestro gráfico
+
+
+```r
+  output$grafico &lt;- renderPlot({
+      req(input$plot)
+      campo &lt;- input$campo[[1]]
+      dataPlot(datos = shp,campo = campo)
+  })
+```
+
+---
+class: middle, center
+![:scale 85%](app3.png)
 ---
 class: inverse,center, middle
 
@@ -156,7 +354,7 @@ class: inverse,center, middle
 
 class: inverse,center, middle
 
-# PRÓXIMA SEMANA SEGUIMOS &lt;br&gt; CONDUCTORES REACTIVOS &lt;br&gt;
+# PRÓXIMA SEMANA SEGUIMOS &lt;br&gt; MEJORANDO NUESTRA APP &lt;br&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
