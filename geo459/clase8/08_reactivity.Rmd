@@ -66,16 +66,23 @@ class: inverse, center, middle
 #Creando una aplicación simple
 
 --
-- Usando información de faenas mineras de Chile de nombre *FaenasMineras.shp* obtenida desde [SINIA, MMA](https://ide.mma.gob.cl/), crearemos una app donde usaremos:
+- Usando información de faenas mineras de Chile de nombre *viña_del_mar.shp* obtenida desde [INE](https://geoine-ine-chile.opendata.arcgis.com/), crearemos una app donde usaremos:
 
 --
 - Código *HTML* y *CSS* empleando la función *tag()*
 
 --
-- Funciones y conductores reactivos (reactive, eventReactive, observers, etc.)
+- Funciones y conductores reactivos (reactives y observers)
 
 --
 - Crearemos una función auxiliar y la emplearemos dentro del código.
+
+.center[![:scale 30%](https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/r_first_then.png)
+
+.footnote[© Allison Horst]
+]
+
+
 
 ---
 #UI base
@@ -102,19 +109,20 @@ ui <- bootstrapPage(
 ```{r eval=F}
 server <- function(input, output, session) {
   #Load data
-  shp <- read_sf('data/data/viña_del_mar.shp') %>% st_transform(4326)
+  shp <- read_sf('data/viña_del_mar.shp') %>% st_transform(4326)
   ## rendering base map
   output$map <- renderLeaflet({
-    leaflet() %>% addProviderTiles(providers$CartoDB.DarkMatter) %>% 
-      addCircleMarkers(data = shp,group = 'Plantaciones') %>%
-      addLayersControl(overlayGroups = 'Plantaciones',position = 'topleft')
+    leaflet() %>% addProviderTiles(providers$CartoDB.DarkMatter)
   })
 }
 ```
 
+--
+Para una visualización previa de los proveedores de imágenes base [click aquí](leaflet-extras.github.io/leaflet-providers/preview/index.html)
 ---
-class: middle, center
-![:scale 65%](app1.png)
+class: center
+![:scale 85%](app1.png)
+
 
 ---
 #Añadiendo opciones
@@ -123,7 +131,7 @@ class: middle, center
 - Agregaremos un panel donde pondremos nuestras opciones
 
 --
-- Importante conocer esto sobre los paneles y su posición [Más info.](https://leafletjs.com/reference-1.7.1.html#map-pane)
+- Importante conocer esto sobre los paneles y su posición en la página [Más info.](https://leafletjs.com/reference-1.7.1.html#map-pane)
 --
 -
 ```{r, eval=F}
@@ -134,7 +142,7 @@ absolutePanel(id="controls",
                 class = "panel panel-default",
                 selectInput(inputId = 'resumen',label = 'Seleccione nivel para resumen',
                             choices = c(1,2,3)),
-                actionButton('remap',label = 'Mostrar información seleccionada')
+                actionButton('plot',label = 'Mostrar información seleccionada')
   )
 ```
 

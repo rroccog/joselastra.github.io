@@ -4,6 +4,7 @@
     <title>Unidad 2: Funciones auxiliares -  Operaciones en el server</title>
     <meta charset="utf-8" />
     <meta name="author" content="Mg. José A. Lastra" />
+    <meta name="date" content="2020-03-10" />
     <link href="libs/remark-css/fc.css" rel="stylesheet" />
   </head>
   <body>
@@ -14,7 +15,7 @@ class: center, middle, inverse, title-slide
 ## Curso: Análisis espacial, web-mapping y <br>aplicaciones web con R Shiny<br>
 ### Mg. José A. Lastra
 ### Laboratorio Geo-Información y Percepción Remota
-### 27/09/2020
+### 03/10/2020
 
 ---
 
@@ -62,16 +63,23 @@ class: inverse, center, middle
 #Creando una aplicación simple
 
 --
-- Usando información de faenas mineras de Chile de nombre *FaenasMineras.shp* obtenida desde [SINIA, MMA](https://ide.mma.gob.cl/), crearemos una app donde usaremos:
+- Usando información de faenas mineras de Chile de nombre *viña_del_mar.shp* obtenida desde [INE](https://geoine-ine-chile.opendata.arcgis.com/), crearemos una app donde usaremos:
 
 --
 - Código *HTML* y *CSS* empleando la función *tag()*
 
 --
-- Funciones y conductores reactivos (reactive, eventReactive, observers, etc.)
+- Funciones y conductores reactivos (reactives y observers)
 
 --
 - Crearemos una función auxiliar y la emplearemos dentro del código.
+
+.center[![:scale 30%](https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/r_first_then.png)
+
+.footnote[© Allison Horst]
+]
+
+
 
 ---
 #UI base
@@ -100,19 +108,43 @@ ui &lt;- bootstrapPage(
 ```r
 server &lt;- function(input, output, session) {
   #Load data
-  shp &lt;- read_sf('data/FaenasMineras.shp') %&gt;% st_transform(4326)
+  shp &lt;- read_sf('data/viña_del_mar.shp') %&gt;% st_transform(4326)
   ## rendering base map
   output$map &lt;- renderLeaflet({
-    leaflet() %&gt;% addProviderTiles(providers$CartoDB.DarkMatter) %&gt;% 
-      addCircleMarkers(data = shp,group = 'Plantaciones') %&gt;%
-      addLayersControl(overlayGroups = 'Plantaciones',position = 'topleft')
+    leaflet() %&gt;% addProviderTiles(providers$CartoDB.DarkMatter)
   })
 }
 ```
 
+--
+Para una visualización previa de los proveedores de imágenes base [click aquí](leaflet-extras.github.io/leaflet-providers/preview/index.html)
 ---
-class: middle, center
-![:scale 65%](app1.png)
+class: center
+![:scale 85%](app1.png)
+
+
+---
+#Añadiendo opciones
+
+--
+- Agregaremos un panel donde pondremos nuestras opciones
+
+--
+- Importante conocer esto sobre los paneles y su posición en la página [Más info.](https://leafletjs.com/reference-1.7.1.html#map-pane)
+--
+-
+
+```r
+absolutePanel(id="controls",
+                style="z-index:500;", top = 90, left = "auto", right = 20, 
+                bottom = "auto",
+                width = 400, height ="auto",
+                class = "panel panel-default",
+                selectInput(inputId = 'resumen',label = 'Seleccione nivel para resumen',
+                            choices = c(1,2,3)),
+                actionButton('plot',label = 'Mostrar información seleccionada')
+  )
+```
 
 
 ---
