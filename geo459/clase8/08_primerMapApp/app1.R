@@ -67,7 +67,7 @@ server <- function(input, output, session) {
 
   output$grafico <- renderPlot({
       req(input$plot)
-      campo <- input$campo[[1]]
+      campo <- input$campo[[1]] 
       dataPlot(datos = shp,campo = campo)
   })
 
