@@ -102,6 +102,7 @@ ui <- bootstrapPage(
 )
 ```
 
+
 ---
 #Server base
 
@@ -338,9 +339,10 @@ dataPlot <- function(datos , campo){
 class: middle, center
 ![:scale 85%](app3.png)
 ---
-class: inverse,center, middle
+class: inverse,center
 
 # ¿PREGUNTAS?
+
 
 ---
 
