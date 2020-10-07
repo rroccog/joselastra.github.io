@@ -339,7 +339,7 @@ dataPlot <- function(datos , campo){
 class: middle, center
 ![:scale 85%](app3.png)
 ---
-class: inverse,center
+class: inverse,center, middle
 
 # ¿PREGUNTAS?
 
