@@ -21,6 +21,7 @@ ui <- bootstrapPage(
                                            'Densidad (per/ha)'='DENSIDAD',
                                            'Viviendas'='TOTAL_VIVI')),
                 actionButton(inputId = 'plot',label = 'Presione para ver el histograma'),
+                htmlOutput("mouse"),
                 plotOutput(outputId = 'grafico')
   )
 )
@@ -50,7 +51,11 @@ server <- function(input, output, session) {
       proxyMap <- proxyMap %>% clearShapes() %>% clearControls() %>% 
         addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(PERSONAS), fillOpacity = 0.7,
                     stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2, 
-                    label = ~htmlEscape(PERSONAS)) %>%
+                    label = ~htmlEscape(PERSONAS),
+                    labelOptions = labelOptions(style = list("color" = "black", "font-size" = "16px",
+                                                                                   "font-family" = "serif",
+                                                                                    "font-weight" = "bold"
+                    ))) %>%
         addLegend("bottomright", pal = pal, values = dominio,
                   title = "Total de personas por manzana censal",
                   opacity = 0.7,group = 'Leyenda')
@@ -84,6 +89,13 @@ server <- function(input, output, session) {
     campo <- isolate({input$campo[[1]]})
     
     dataPlot(datos = shp,campo = campo)
+  })
+  
+  observe({
+    data_mouse <- input$map_shape_mouseover
+    output$mouse <- renderText({
+      paste('<b>Mouse info </b>',data_mouse$lat,'|',data_mouse$lng)
+    })
   })
 
 }
