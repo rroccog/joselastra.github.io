@@ -1,5 +1,6 @@
 library(shiny)
 library(leaflet)
+library(htmltools)
 library(tidyverse)
 library(sf)
 library(shinybusy)
@@ -27,6 +28,8 @@ ui <- bootstrapPage(
 server <- function(input, output, session) {
   #Load data
   shp <- read_sf('data/viña_del_mar.gpkg') %>% st_transform(4326)
+  shp$label_pop <- paste0('<strong>', 'Data:' , '</strong>','</br>', shp$PERSONAS) %>% 
+    lapply(htmltools::HTML)
   ## rendering base map
   output$map <- renderLeaflet({
     leaflet() %>% addProviderTiles(providers$CartoDB.DarkMatter)%>% 
@@ -36,26 +39,39 @@ server <- function(input, output, session) {
   #proxy map changes
   observe({
     #preparando paletas
-    dominio <- shp[,input$campo[[1]]] %>% unlist() %>% as.numeric()
+    tabla <- shp[,] %>% as.data.frame() 
+    dominio <- tabla[, input$campo[[1]]]
     #creando paleta de colores dinámica
-    pal <- colorBin(palette = "viridis",domain = dominio)
+    pal <- colorQuantile(palette = "viridis",domain = dominio,n = 7)
     #proxy Map
-    proxyMap <- leafletProxy('map') %>% clearShapes()
+    proxyMap <- leafletProxy('map') 
     
     if(input$campo[[1]] == 'PERSONAS'){
-      proxyMap <- proxyMap %>% 
+      proxyMap <- proxyMap %>% clearShapes() %>% clearControls() %>% 
         addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(PERSONAS), fillOpacity = 0.7,
-                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2, 
+                    label = ~htmlEscape(PERSONAS)) %>%
+        addLegend("bottomright", pal = pal, values = dominio,
+                  title = "Total de personas por manzana censal",
+                  opacity = 0.7,group = 'Leyenda')
     }
     if(input$campo[[1]] == 'TOTAL_VIVI'){
-      proxyMap <- proxyMap %>% 
+      proxyMap <- proxyMap %>% clearShapes() %>% clearControls() %>% 
         addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(TOTAL_VIVI), fillOpacity = 0.7,
-                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2, 
+                    popup = ~htmlEscape(TOTAL_VIVI))%>%
+        addLegend("bottomright", pal = pal, values = dominio,
+                  title = "Total de viviendas por manzana censal",
+                  opacity = 0.7,group = 'Manzanas')
     }
     if(input$campo[[1]] == 'DENSIDAD'){
-      proxyMap <- proxyMap %>% 
+      proxyMap <- proxyMap %>% clearShapes() %>% clearControls() %>% 
         addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(DENSIDAD), fillOpacity = 0.7,
-                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2)
+                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2, 
+                    label = ~htmlEscape(DENSIDAD))%>%
+        addLegend("bottomright", pal = pal, values = dominio,
+                  title = "Densidad (personas/hectáreas)",
+                  opacity = 0.7,group = 'Manzanas')
     }
     #print map
     proxyMap
