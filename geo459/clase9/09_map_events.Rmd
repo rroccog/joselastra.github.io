@@ -23,6 +23,7 @@ background-size:40%
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 library(shiny)
+library(htmltools)
 library(leaflet)
 library(tidyverse)
 library(sf)
@@ -37,6 +38,7 @@ Librerías utilizadas en esta sesión
 ```{r eval=F}
 library(shiny)
 library(leaflet)
+library(htmltools)
 library(tidyverse)
 library(sf)
 library(shinybusy)
@@ -98,7 +100,6 @@ Este código asegura una mejor distribución de los colores considerando el sesg
                   title = "Total de personas por manzana censal",opacity = 0.7,group = 'Leyenda')
     }
 ```
-
 
 ---
 #Etiquetas de datos
@@ -174,8 +175,147 @@ addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(PERSONAS), fillOpaci
 ---
 .center[
 ![](app3.png)
+]
 ---
+#Una mejor opción 
 
+--
+- Crear una columna donde esté la etiqueta (para tablas y shapes)
+
+--
+- *Ejemplo*
+
+```{r eval=F}
+ ## custom labels for map
+  shp$label_pop <- paste0('<strong>', 'Total población:' , '</strong>', shp$PERSONAS,'</br>',
+                          '<strong>', 'Densidad:' , '</strong>',shp$DENSIDAD) %>% 
+    lapply(htmltools::HTML)
+```
+
+--
+- Este ejemplo muestra como aplicar código HTML y guardarlo en una columna para que sea empleado como etiqueta.
+- El código en nuestra función `addPolygons()` quedaría así:
+
+--
+```{r eval=F}
+addPolygons(data = shp,group = 'Manzanas', fillColor = ~pal(PERSONAS), fillOpacity = 0.7,
+                    stroke = 0.1,color = 'white',weight = 1, smoothFactor = 0.2, 
+                    label = ~label_pop, 
+                    labelOptions = labelOptions(style = list("font-size" = "14px")))
+```
+---
+.center[
+![:scale 90%](app4.png)
+]
+---
+class: inverse,center, middle
+
+# ¿PREGUNTAS?
+
+---
+#Objects y maps events
+
+--
+- Además de utilizar eventos puestos en la UI (sliders, select inputs, acction buttons, etc.), podemos hacer uso de eventos de mapa y objeto para pasarlos por el server.
+
+--
+- Los eventos de objeto se configuran así `input$MAPID_OBJCATEGORY_EVENTNAME` donde:
+  + MAPID: nombre del mapa;
+  + OBJCATEGORY: tipo de elemento para pasaro por el evento reactivo (marker, shape, geojson o topojson);
+  + EVENTNAME: reacción al mouse (click, mouseover y mouseout)
+
+--
+- Los eventos de mapa se configuran así `input$MAPID_EVENTNAME` donde las opciones de evento disponibles son:
+  + Click;
+  + Bounds;
+  + Zoom;
+  + Center;
+
+--
+- Todos estos generan una lista que contiene información de latitud, longitud e id.
+
+---
+#Usando los eventos
+
+--
+- Agregaremos salidas a nuestra UI para ver las reacciones de los eventos de mapa (solo dejaremos eso)
+
+--
+```{r eval=F}
+ui <- bootstrapPage(
+  tags$style(type = "text/css", "html, body {width:100%;height:100%}"), #esto hace la magia
+  leafletOutput(outputId = 'map', width = "100%", height = "100%"),
+  absolutePanel(id="controls", style="z-index:500;", top = 90, left = "auto", right = 20, 
+                bottom = "auto", width = 400, height ="auto", class = "panel panel-default",
+                selectInput(inputId = 'campo',label = 'Seleccione variable a visualizar',
+                            choices = list('Total personas' = 'PERSONAS', 'Densidad (per/ha)'='DENSIDAD',
+                                           'Viviendas'='TOTAL_VIVI')),hr(),
+                htmlOutput("mouse_over"),hr(),
+                htmlOutput("mouse_click"),hr(),
+                htmlOutput("mouse_center"),hr(),
+                htmlOutput("mouse_zoom"),hr(),
+                htmlOutput("mouse_bounds")
+  )
+)
+```
+
+---
+# Render events
+
+Pondremos esto en el server
+--
+```{r eval=F}
+#mouseover
+  observeEvent(input$map_shape_mouseover,{
+    data_mouse_over <- input$map_shape_mouseover
+    output$mouse_over <- renderText({
+      paste('<b>Mouse shape over: </b>',round(data_mouse_over$lat,digits = 4),'|',
+            round(data_mouse_over$lng,digits = 4))
+    })
+  })
+  #click
+  observeEvent(input$map_click,{
+    data_mouse_click <- input$map_click
+    output$mouse_click <- renderText({
+      paste('<b>Mouse map click: </b>',round(data_mouse_click$lat,digits = 4),'|',
+            round(data_mouse_click$lng,digits = 4))
+    })
+  })
+```
+
+---
+```{r eval=F}
+#center
+  observeEvent(input$map_center,{
+    data_center <- input$map_center
+    output$mouse_center <- renderText({
+      paste('<b>Mouse map center: </b>',round(data_center$lat,digits = 4),'|',
+            round(data_center$lng,digits = 4))
+    })
+  })
+  #zoom
+  observeEvent(input$map_zoom,{
+    data_zoom <- input$map_zoom
+    output$mouse_zoom <- renderText({
+      paste('<b>Mouse map zoom: </b>',data_zoom)
+    })
+  })
+  #bounds
+  observeEvent(input$map_bounds,{
+    data_bounds <- input$map_bounds
+    output$mouse_bounds <- renderText({
+      paste('<b>Map bounds </b>','</br>',
+            '<b>Norte: </b>',round(data_bounds$north,digits = 4),'</br>',
+            '<b>Sur: </b>',round(data_bounds$south,digits = 4),'</br>',
+            '<b>Este: </b>',round(data_bounds$east,digits = 4),'</br>',
+            '<b>Oeste: </b>',round(data_bounds$west,digits = 4),'</br>')
+    })
+  })
+```
+---
+.center[
+![:scale 90%](app5.png)
+]
 ---
 class: inverse,center, middle
 
