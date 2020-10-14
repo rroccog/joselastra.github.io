@@ -69,7 +69,7 @@ server <- function(input, output, session) {
     
     dataPlot(datos = shp,campo = campo)
   })
-
+  
 }
 
 #compilar
