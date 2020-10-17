@@ -1,7 +1,7 @@
 ---
 title: "Fundamentos de webmapping"
 subtitle: "INTRODUCCIÓN AL ANÁLISIS ESPACIAL Y WEBMAPPING CON <br>GOOGLE EARTH ENGINE Y R SHINY <br>"
-author: "Mg. José A. Lastra <br> Matías Oléa<br>Ronald Rocco<br>"
+author: "Mg. José A. Lastra <br> Ronald Rocco<br>Matías Oléa<br>"
 institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r format(Sys.time(), '%d/%m/%Y')`"
 output:
