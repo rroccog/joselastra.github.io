@@ -1,7 +1,7 @@
 ---
-title: "Geo-Datos"
-subtitle: ""
-author: "Ronald Rocco"
+title: "Fundamentos de webmapping"
+subtitle: "INTRODUCCIÓN AL ANÁLISIS ESPACIAL Y WEBMAPPING CON <br>GOOGLE EARTH ENGINE Y R SHINY <br>"
+author: "Mg. José A. Lastra <br> Matías Oléa<br>Ronald Rocco<br>"
 institute: "Laboratorio Geo-Información y Percepción Remota"
 date: "`r format(Sys.time(), '%d/%m/%Y')`"
 output:
@@ -14,7 +14,7 @@ output:
       highlightLines: true
       countIncrementalSlides: false
       beforeInit: "macros.js"
-      
+
 ---
 
 background-image: url(logo_labgrs_color.png)
@@ -42,7 +42,7 @@ class: inverse, center, middle
 # Manipulación de Geo-datos
 
 ---
-# Raster o imágen
+# Raster o imagen
 
 --
 Se puede definir como una matríz de datos numérica, que tienen una extensión dada y un tamaño de píxel específico.
